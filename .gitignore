@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Composer packages
+/vendor/
+
+# Node modules
+/node_modules/
+
+# Built assets
+/assets/
+
+# Logs
+/logs/
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+
+# OS specific files
+.DS_Store
+Thumbs.db
