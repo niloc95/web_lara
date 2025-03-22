@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,23 +21,55 @@ use Inertia\Inertia;
 |
 */
 
+// Public routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Protected routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+    // Calendar routes
+    Route::prefix('calendar')->middleware(['auth'])->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->name('calendar');
+        Route::get('/day/{date?}', [CalendarController::class, 'day'])->name('calendar.day');
+        Route::get('/week/{date?}', [CalendarController::class, 'week'])->name('calendar.week');
+        Route::get('/month/{date?}', [CalendarController::class, 'month'])->name('calendar.month');
+    });
+
+    // Appointments
+    Route::resource('appointments', AppointmentController::class);
+    Route::patch('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])
+        ->name('appointments.status');
+
+    // Clients
+    Route::resource('clients', ClientController::class);
+    Route::get('clients/{client}/{name?}', [ClientController::class, 'show'])->name('clients.show');
+
+    // Services
+    Route::resource('services', ServiceController::class);
+
+    // User profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Settings
+    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])
+        ->name('settings.index');
+    Route::post('/settings', [App\Http\Controllers\SettingsController::class, 'update'])
+        ->name('settings.update');
+
+    // API Clients
+    Route::post('/api/clients', [App\Http\Controllers\ClientApiController::class, 'store'])
+        ->name('clients.api.store');
 });
 
 require __DIR__.'/auth.php';

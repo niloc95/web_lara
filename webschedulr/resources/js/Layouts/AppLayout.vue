@@ -1,31 +1,7 @@
-import './bootstrap';
-import '../css/app.css';
-
-import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { ZiggyVue } from '../../vendor/tightenco/ziggy';
-
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-
-createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
-    setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(ZiggyVue)
-            .mount(el);
-    },
-    progress: {
-        color: '#4B5563',
-    },
-});
-```
-<!-- filepath: /home/nilo/projects/web_lara/webschedulr/resources/js/Layouts/AppLayout.vue -->
 <script setup>
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import NavLink from '@/Components/NavLink.vue'; // Add this import
 
 const showingNavigationDropdown = ref(false);
 
@@ -47,13 +23,26 @@ const logout = () => {
                                 </Link>
                             </div>
 
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <Link :href="route('dashboard')" :class="{'text-gray-900': route().current('dashboard'), 'text-gray-500': !route().current('dashboard')}">
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex items-center">
+                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
-                                </Link>
-                                <Link :href="route('settings.index')" :class="{'text-gray-900': route().current('settings.index'), 'text-gray-500': !route().current('settings.index')}">
+                                </NavLink>
+                                
+                                <NavLink :href="route('clients.index')" :active="route().current('clients.*')">
+                                    Clients
+                                </NavLink>
+                                
+                                <NavLink :href="route('appointments.index')" :active="route().current('appointments.*')">
+                                    Appointments
+                                </NavLink>
+                                
+                                <NavLink :href="route('settings.index')" :active="route().current('settings.*')">
                                     Settings
-                                </Link>
+                                </NavLink>
+
+                                <NavLink :href="route('calendar')" :active="route().current('calendar*')">
+                                    Calendar
+                                </NavLink>
                             </div>
                         </div>
 
@@ -74,4 +63,3 @@ const logout = () => {
         </div>
     </div>
 </template>
-```
