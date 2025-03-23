@@ -291,11 +291,11 @@ public function ajaxCreate() {
         
         // Insert client
         try {
-            // Dump values for debugging (comment out in production)
-            if (Config::DEBUG_MODE) {
-                error_log("Trying to insert client with values: " . 
-                    "userId=$userId, name=$name, email=$email, phone=$phone");
-            }
+            // // Dump values for debugging (comment out in production)
+            // if (Config::DEBUG_MODE) {
+            //     error_log("Trying to insert client with values: " . 
+            //         "userId=$userId, name=$name, email=$email, phone=$phone");
+            // }
             
             $query = "INSERT INTO clients (user_id, name, email, phone, address, notes, created_at) 
                      VALUES (:userId, :name, :email, :phone, :address, :notes, NOW())";
@@ -662,55 +662,55 @@ public function ajaxCreate() {
     }
 
     // Simple direct query function for debugging
-    public function debug() {
-        $this->startSession();
+    // public function debug() {
+    //     $this->startSession();
         
-        if (!isset($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
+    //     if (!isset($_SESSION['user'])) {
+    //         header('Location: /login');
+    //         exit;
+    //     }
         
-        $userId = $_SESSION['user']['id'];
+    //     $userId = $_SESSION['user']['id'];
         
-        try {
-            // Direct, simple query
-            $stmt = $this->db->prepare("SELECT * FROM clients WHERE user_id = ?");
-            $stmt->execute([$userId]);
-            $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    //     try {
+    //         // Direct, simple query
+    //         $stmt = $this->db->prepare("SELECT * FROM clients WHERE user_id = ?");
+    //         $stmt->execute([$userId]);
+    //         $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            echo "<h2>Debug Client List</h2>";
+    //         echo "<h2>Debug Client List</h2>";
             
-            if (count($clients) === 0) {
-                echo "<p>No clients found. Adding sample client...</p>";
+    //         if (count($clients) === 0) {
+    //             echo "<p>No clients found. Adding sample client...</p>";
                 
-                // Add a sample client
-                $this->db->prepare("
-                    INSERT INTO clients (user_id, name, email, phone, created_at) 
-                    VALUES (?, 'Debug Client', 'debug@example.com', '555-1234', NOW())
-                ")->execute([$userId]);
+    //             // Add a sample client
+    //             $this->db->prepare("
+    //                 INSERT INTO clients (user_id, name, email, phone, created_at) 
+    //                 VALUES (?, 'Debug Client', 'debug@example.com', '555-1234', NOW())
+    //             ")->execute([$userId]);
                 
-                echo "<p>Sample client added. <a href='/clients/debug'>Refresh</a></p>";
-            } else {
-                echo "<table border='1'>
-                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th></tr>";
+    //             echo "<p>Sample client added. <a href='/clients/debug'>Refresh</a></p>";
+    //         } else {
+    //             echo "<table border='1'>
+    //                 <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th></tr>";
                 
-                foreach ($clients as $client) {
-                    echo "<tr>
-                        <td>{$client['id']}</td>
-                        <td>{$client['name']}</td>
-                        <td>{$client['email']}</td>
-                        <td>{$client['phone']}</td>
-                    </tr>";
-                }
+    //             foreach ($clients as $client) {
+    //                 echo "<tr>
+    //                     <td>{$client['id']}</td>
+    //                     <td>{$client['name']}</td>
+    //                     <td>{$client['email']}</td>
+    //                     <td>{$client['phone']}</td>
+    //                 </tr>";
+    //             }
                 
-                echo "</table>";
-            }
+    //             echo "</table>";
+    //         }
             
-        } catch (PDOException $e) {
-            echo "<h2>Database Error</h2>";
-            echo "<p>Error: " . $e->getMessage() . "</p>";
-        }
+    //     } catch (PDOException $e) {
+    //         echo "<h2>Database Error</h2>";
+    //         echo "<p>Error: " . $e->getMessage() . "</p>";
+    //     }
         
-        exit;
-    }
+    //     exit;
+    // }
 }

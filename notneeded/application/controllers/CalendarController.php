@@ -4,11 +4,11 @@ require_once __DIR__ . '/BaseController.php';
 
 class CalendarController extends BaseController {
     
-    public function __construct() {
-        parent::__construct();
-        // Add debugging to track controller instantiation
-        error_log("CalendarController initialized");
-    }
+    // public function __construct() {
+    //     parent::__construct();
+    //     // Add debugging to track controller instantiation
+    //     error_log("CalendarController initialized");
+    // }
     
     // Calendar Month View
     public function index() {
@@ -437,7 +437,7 @@ public function updateStatus() {
         $userId = $_SESSION['user']['id'];
         
         // Add critical debugging
-        error_log("CalendarController::edit called with ID: $id");
+        // error_log("CalendarController::edit called with ID: $id");
         
         try {
             // Get appointment data

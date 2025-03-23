@@ -118,19 +118,19 @@ class Router {
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
-        // For debugging
-        if (isset($_GET['debug_router'])) {
-            echo "<h1>Router Debug</h1>";
-            echo "<p>Request Method: $requestMethod</p>";
-            echo "<p>Request Path: $requestPath</p>";
-            echo "<h2>Registered Routes</h2><ul>";
-            foreach ($this->routes as $method => $routes) {
-                foreach ($routes as $route => $callback) {
-                    echo "<li>$method: $route</li>";
-                }
-            }
-            echo "</ul>";
-        }
+        // // For debugging
+        // if (isset($_GET['debug_router'])) {
+        //     echo "<h1>Router Debug</h1>";
+        //     echo "<p>Request Method: $requestMethod</p>";
+        //     echo "<p>Request Path: $requestPath</p>";
+        //     echo "<h2>Registered Routes</h2><ul>";
+        //     foreach ($this->routes as $method => $routes) {
+        //         foreach ($routes as $route => $callback) {
+        //             echo "<li>$method: $route</li>";
+        //         }
+        //     }
+        //     echo "</ul>";
+        // }
         
         // Find matching route
         $match = $this->matchRoute($requestMethod, $requestPath);

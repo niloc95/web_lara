@@ -109,34 +109,34 @@ class AppointmentController extends BaseController {
         }
     }
 
-    /**
-     * Display direct database schema information for debugging
-     */
-    public function showSchema() {
-        $this->startSession();
+//     /**
+//      * Display direct database schema information for debugging
+//      */
+//     public function showSchema() {
+//         $this->startSession();
         
-        if (!isset($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
+//         if (!isset($_SESSION['user'])) {
+//             header('Location: /login');
+//             exit;
+//         }
         
-        $title = 'Database Schema';
+//         $title = 'Database Schema';
         
-        try {
-            // Get appointments table structure
-            $stmt = $this->db->query("DESCRIBE appointments");
-            $appointmentsColumns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//         try {
+//             // Get appointments table structure
+//             $stmt = $this->db->query("DESCRIBE appointments");
+//             $appointmentsColumns = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Get sample data
-            $stmt = $this->db->prepare("SELECT * FROM appointments WHERE user_id = ? LIMIT 1");
-            $stmt->execute([$_SESSION['user']['id']]);
-            $sampleAppointment = $stmt->fetch(PDO::FETCH_ASSOC);
+//             // Get sample data
+//             $stmt = $this->db->prepare("SELECT * FROM appointments WHERE user_id = ? LIMIT 1");
+//             $stmt->execute([$_SESSION['user']['id']]);
+//             $sampleAppointment = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            include __DIR__ . '/../views/appointment/schema.php';
+//             include __DIR__ . '/../views/appointment/schema.php';
             
-        } catch (PDOException $e) {
-            $error = "Database error: " . $e->getMessage();
-            include __DIR__ . '/../views/error.php';
-        }
-    }
+//         } catch (PDOException $e) {
+//             $error = "Database error: " . $e->getMessage();
+//             include __DIR__ . '/../views/error.php';
+//         }
+//     }
 }

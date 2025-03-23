@@ -241,12 +241,12 @@ class ServiceController {
                 exit;
             }
             
-            // For debugging - you can remove this after confirming data is retrieved
-            if (isset($_GET['debug'])) {
-                echo "<pre>";
-                print_r($service);
-                echo "</pre>";
-            }
+            // // For debugging - you can remove this after confirming data is retrieved
+            // if (isset($_GET['debug'])) {
+            //     echo "<pre>";
+            //     print_r($service);
+            //     echo "</pre>";
+            // }
             
             // Get existing categories for the dropdown
             $query = "SELECT DISTINCT category FROM services 
