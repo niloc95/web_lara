@@ -110,73 +110,139 @@
           </div>
         </div>
 
+        <!-- Today's Schedule - Enhanced Version -->
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-6">
           <div class="p-4 border-b border-gray-200 flex justify-between items-center">
             <h2 class="font-semibold text-lg text-gray-800">Today's Schedule</h2>
-            <Link :href="route('calendar.day', { date: formattedDateYmd })" class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
-              View Full Day
-            </Link>
-          </div>
-          <div class="p-6">
-            <div v-if="!todaysAppointments.length" class="text-center py-8">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p class="text-gray-500">No appointments scheduled for today.</p>
-              <Link :href="route('appointments.create')" class="inline-block mt-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="flex items-center space-x-2">
+              <Link :href="route('appointments.create')" class="inline-flex items-center px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Schedule Appointment
+                New
+              </Link>
+              <Link :href="route('calendar.day', { date: formattedDateYmd })" class="inline-flex items-center px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Full Day
               </Link>
             </div>
-            <div v-else class="relative overflow-visible">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="appointment in todaysAppointments" :key="appointment.id" class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {{ formatTime(appointment.start_time) }} - {{ formatTime(appointment.end_time || 
-                        new Date(new Date(appointment.start_time).getTime() + 3600000).toISOString()) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {{ appointment.client.name }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span v-if="appointment.service?.color" class="inline-block w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: appointment.service.color }"></span>
-                      {{ appointment.service?.name || 'N/A' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span :class="getStatusClass(appointment.status)" class="px-2 py-1 text-xs rounded-full">
-                        {{ capitalize(appointment.status) }}
+          </div>
+          
+          <div v-if="!todaysAppointments.length" class="text-center py-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-gray-500">No appointments scheduled for today.</p>
+            <Link :href="route('appointments.create')" class="inline-block mt-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Schedule Appointment
+            </Link>
+          </div>
+          
+          <div v-else class="relative overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="appointment in todaysAppointments" :key="appointment.id" class="hover:bg-gray-50">
+                  <!-- Time Cell -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ formatTime(appointment.start_time) }}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      to {{ formatTime(appointment.end_time || new Date(new Date(appointment.start_time).getTime() + 3600000).toISOString()) }}
+                    </div>
+                    <div v-if="isUpcoming(appointment.start_time)" class="mt-1">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Coming up
                       </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div class="relative">
-                        <button 
-                          @click.stop="toggleDropdown(appointment.id)" 
-                          :id="`dropdown-btn-${appointment.id}`"
-                          class="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none"
-                        >
-                          Actions
-                          <svg class="w-5 h-5 ml-2 -mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                          </svg>
-                        </button>
+                    </div>
+                  </td>
+                  
+                  <!-- Client Cell -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <Link :href="route('clients.show', appointment.client.id)" class="text-sm font-medium text-gray-900 hover:text-indigo-600 flex items-center">
+                      <div class="flex-shrink-0 h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center mr-2">
+                        <span class="text-xs font-medium">{{ getInitials(appointment.client.name) }}</span>
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                      {{ appointment.client.name }}
+                    </Link>
+                    <div class="text-xs text-gray-500">{{ appointment.client.phone || '' }}</div>
+                    <div v-if="appointment.client.email" class="text-xs text-gray-500">{{ appointment.client.email }}</div>
+                  </td>
+                  
+                  <!-- Service Cell -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <span 
+                        v-if="appointment.service?.color" 
+                        class="inline-block w-3 h-3 rounded-full mr-2" 
+                        :style="{ backgroundColor: appointment.service.color }"
+                      ></span>
+                      <span class="text-sm text-gray-900">
+                        {{ appointment.service?.name || 'N/A' }}
+                      </span>
+                    </div>
+                    <div v-if="appointment.service?.duration" class="text-xs text-gray-500 mt-1">
+                      {{ appointment.service.duration }} minutes
+                    </div>
+                    <div v-if="appointment.service?.price" class="text-xs text-gray-500">
+                      ${{ appointment.service.price }}
+                    </div>
+                  </td>
+                  
+                  <!-- Status Cell -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <button 
+                      @click.stop="toggleDropdown(appointment.id)" 
+                      :id="`dropdown-btn-${appointment.id}`"
+                      class="relative inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium w-auto cursor-pointer"
+                      :class="getStatusClass(appointment.status)"
+                    >
+                      {{ capitalize(appointment.status) }}
+                      <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </td>
+                  
+                  <!-- Actions Cell -->
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div class="flex items-center space-x-3">
+                      <Link :href="route('appointments.edit', appointment.id)" class="text-indigo-600 hover:text-indigo-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </Link>
+                      
+                      <Link :href="route('clients.show', appointment.client.id)" class="text-blue-600 hover:text-blue-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </Link>
+                      
+                      <button @click.stop="confirmDelete(appointment)" class="text-red-600 hover:text-red-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -323,11 +389,15 @@ function formatTime(dateString) {
 
 function getStatusClass(status) {
   switch (status) {
-    case 'confirmed': return 'bg-green-100 text-green-800';
-    case 'completed': return 'bg-blue-100 text-blue-800';
-    case 'cancelled': return 'bg-red-100 text-red-800';
+    case 'confirmed': 
+      return 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-300';
+    case 'completed': 
+      return 'bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300';
+    case 'cancelled': 
+      return 'bg-red-100 text-red-800 hover:bg-red-200 border border-red-300';
     case 'pending':
-    default: return 'bg-yellow-100 text-yellow-800';
+    default: 
+      return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300';
   }
 }
 
@@ -442,5 +512,40 @@ function enableBodyScroll() {
 
 function goToDate() {
   router.get(route('calendar.day', { date: jumpDate.value }));
+}
+
+// Add this function to check if an appointment is coming up soon
+function isUpcoming(dateString) {
+  if (!dateString) return false;
+  
+  const now = new Date();
+  const appointmentTime = new Date(dateString);
+  const diffMinutes = (appointmentTime - now) / (1000 * 60);
+  
+  // Return true if appointment is within next 30 minutes
+  return diffMinutes > 0 && diffMinutes <= 30;
+}
+
+// Add this function to get client initials
+function getInitials(name) {
+  if (!name) return '';
+  
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
+}
+
+// Add this function for delete confirmation
+function confirmDelete(appointment) {
+  if (confirm(`Are you sure you want to delete the appointment with ${appointment.client.name}?`)) {
+    router.delete(route('appointments.destroy', appointment.id), {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Show success toast or notification if desired
+      }
+    });
+  }
 }
 </script>

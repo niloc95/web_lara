@@ -101,10 +101,21 @@ class DashboardController extends Controller
         }
         
         return Inertia::render('Dashboard', [
-            'stats' => $stats,
+            'stats' => [
+                'upcoming_appointments' => 10,
+                'today_appointments' => 5,
+                'tomorrow_appointments' => 3,
+            ],
             'todaysAppointments' => $todaysAppointments,
-            'statusStats' => $statusStats,
-            'appointmentsByDay' => $appointmentsByDay,
+            'statusStats' => [
+                'labels' => ['Pending', 'Confirmed', 'Completed', 'Cancelled'],
+                'data' => [5, 10, 3, 2],
+                'backgrounds' => ['#f6c23e', '#1cc88a', '#4e73df', '#e74a3b']
+            ],
+            'appointmentsByDay' => [
+                'labels' => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                'data' => [5, 10, 8, 12, 8, 6, 4]
+            ],
             'recentClients' => $recentClients,
         ]);
     }

@@ -1,4 +1,3 @@
-<!-- resources/js/Components/Charts/BarChart.vue -->
 <template>
   <div class="h-full w-full">
     <canvas ref="chartCanvas"></canvas>
@@ -6,44 +5,60 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import Chart from 'chart.js/auto'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
+import Chart from 'chart.js/auto';
 
 const props = defineProps({
-  chartData: Object
-})
+  chartData: {
+    type: Object,
+    required: true
+  },
+  options: {
+    type: Object,
+    default: () => ({})
+  }
+});
 
-const chartCanvas = ref(null)
-let chart = null
+const chartCanvas = ref(null);
+let chart = null;
 
 function createChart() {
-  if (chart) chart.destroy()
+  if (chart) chart.destroy();
   
-  chart = new Chart(chartCanvas.value, {
-    type: 'bar',
-    data: props.chartData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+  const ctx = chartCanvas.value.getContext('2d');
+  
+  const defaultOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
       }
     }
-  })
+  };
+  
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: props.chartData,
+    options: { ...defaultOptions, ...props.options }
+  });
 }
 
 onMounted(() => {
-  createChart()
-})
+  createChart();
+});
 
 watch(() => props.chartData, () => {
-  createChart()
-}, { deep: true })
+  createChart();
+}, { deep: true });
+
+watch(() => props.options, () => {
+  createChart();
+}, { deep: true });
+
+onBeforeUnmount(() => {
+  if (chart) {
+    chart.destroy();
+  }
+});
 </script>

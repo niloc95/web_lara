@@ -1,5 +1,10 @@
-<!-- resources/js/Components/Pagination.vue -->
+<!-- resources/js/Components/Pagination.vue Nilo -->
 <template>
+  <!-- Add this at the top for debugging -->
+  <!-- <pre v-if="debug" class="text-xs p-4 bg-gray-100 rounded">
+    {{ JSON.stringify(links, null, 2) }}
+  </pre> -->
+  
   <div class="flex items-center justify-between">
     <div class="flex-1 flex justify-between sm:hidden">
       <a v-if="links[0].url" 
@@ -87,12 +92,17 @@
       </div>
     </div>
   </div>
+  
 </template>
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({
   links: Array
 });
+
+// Add debugging functionality
+// const debug = ref(true); // Set to false in production
 </script>

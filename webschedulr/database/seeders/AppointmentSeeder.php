@@ -2,93 +2,103 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
 use App\Models\Appointment;
 use App\Models\Client;
 use App\Models\Service;
+use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Seeder;
 
 class AppointmentSeeder extends Seeder
 {
-    public function run(): void
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
     {
-        $userId = 1; // Assuming the first user ID
-        $clients = Client::where('user_id', $userId)->get();
-        $services = Service::where('user_id', $userId)->get();
+        // Get all clients, services, and users to randomly assign
+        $clients = Client::all();
+        $services = Service::all();
+        $users = User::all();
         
-        if ($clients->isEmpty() || $services->isEmpty()) {
-            return; // No clients or services to create appointments for
+        // Make sure we have clients, services, and users
+        if ($clients->isEmpty()) {
+            $this->command->error('No clients found. Please seed clients first.');
+            return;
         }
         
-        $statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+        if ($services->isEmpty()) {
+            $this->command->error('No services found. Please seed services first.');
+            return;
+        }
+        
+        if ($users->isEmpty()) {
+            $this->command->error('No users found. Please seed users first.');
+            return;
+        }
+        
+        // Get today's date and end of year
         $today = Carbon::today();
+        $endOfYear = Carbon::parse($today->year . '-12-31');
         
-        // Past appointments (last 30 days)
-        for ($i = 1; $i <= 15; $i++) {
-            $client = $clients->random();
-            $service = $services->random();
-            $pastDay = $today->copy()->subDays(rand(1, 30));
-            $startTime = $pastDay->copy()->setHour(rand(9, 16))->setMinute(rand(0, 3) * 15);
-            $endTime = $startTime->copy()->addMinutes($service->duration);
+        // Status options
+        $statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+        
+        // For each day until end of year
+        for ($date = $today->copy(); $date->lte($endOfYear); $date->addDay()) {
+            $this->command->info("Creating appointments for: " . $date->format('Y-m-d'));
             
-            // More likely to be completed or cancelled since they're in the past
-            $status = rand(0, 10) > 2 ? 'completed' : (rand(0, 10) > 7 ? 'cancelled' : 'pending');
-            
-            Appointment::create([
-                'user_id' => $userId,
-                'client_id' => $client->id,
-                'service_id' => $service->id,
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'status' => $status,
-                'notes' => rand(0, 5) > 3 ? 'Sample appointment notes' : null,
-                'is_recurring' => false,
-            ]);
+            // Create 5 appointments for each day
+            for ($i = 1; $i <= 6; $i++) {
+                // Generate a random hour between 9 AM and 5 PM
+                $hour = rand(9, 16);
+                $minute = [0, 15, 30, 45][rand(0, 3)]; // 15-minute intervals
+                
+                // Create start time
+                $startTime = $date->copy()->setHour($hour)->setMinute($minute)->setSecond(0);
+                
+                // Create end time (1 hour after start time)
+                $endTime = $startTime->copy()->addHour();
+                
+                // Randomly select client, service, and user
+                $client = $clients->random();
+                $service = $services->random();
+                $user = $users->random();
+                
+                // Randomly select status, weighted toward confirmed
+                $weights = [15, 60, 20, 5]; // pending, confirmed, completed, cancelled
+                $randomNumber = rand(1, 100);
+                $cumulativeWeight = 0;
+                $status = $statuses[0];
+                
+                for ($j = 0; $j < count($weights); $j++) {
+                    $cumulativeWeight += $weights[$j];
+                    if ($randomNumber <= $cumulativeWeight) {
+                        $status = $statuses[$j];
+                        break;
+                    }
+                }
+                
+                // For dates in the past, never use 'pending'
+                if ($date->lt($today) && $status === 'pending') {
+                    $status = 'completed';
+                }
+                
+                // Create the appointment
+                Appointment::create([
+                    'client_id' => $client->id,
+                    'service_id' => $service->id,
+                    'user_id' => $user->id, // Add the user_id
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                    'status' => $status,
+                    'notes' => 'Auto-generated appointment #' . $i . ' for ' . $date->format('Y-m-d'),
+                ]);
+            }
         }
         
-        // Today's appointments
-        for ($i = 1; $i <= 5; $i++) {
-            $client = $clients->random();
-            $service = $services->random();
-            $startTime = $today->copy()->setHour(9 + $i * 2)->setMinute(rand(0, 3) * 15);
-            $endTime = $startTime->copy()->addMinutes($service->duration);
-            
-            $currentHour = Carbon::now()->hour;
-            $status = $startTime->hour < $currentHour ? 'completed' : ($startTime->hour === $currentHour ? 'confirmed' : 'pending');
-            
-            Appointment::create([
-                'user_id' => $userId,
-                'client_id' => $client->id,
-                'service_id' => $service->id,
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'status' => $status,
-                'notes' => rand(0, 5) > 3 ? 'Today\'s appointment' : null,
-                'is_recurring' => false,
-            ]);
-        }
-        
-        // Future appointments (next 30 days)
-        for ($i = 1; $i <= 20; $i++) {
-            $client = $clients->random();
-            $service = $services->random();
-            $futureDay = $today->copy()->addDays(rand(1, 30));
-            $startTime = $futureDay->copy()->setHour(rand(9, 16))->setMinute(rand(0, 3) * 15);
-            $endTime = $startTime->copy()->addMinutes($service->duration);
-            
-            // More likely to be pending or confirmed since they're in the future
-            $status = rand(0, 10) > 7 ? 'pending' : 'confirmed';
-            
-            Appointment::create([
-                'user_id' => $userId,
-                'client_id' => $client->id,
-                'service_id' => $service->id,
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'status' => $status,
-                'notes' => rand(0, 5) > 3 ? 'Future appointment' : null,
-                'is_recurring' => false,
-            ]);
-        }
+        $this->command->info('Successfully created appointments until the end of the year!');
     }
 }

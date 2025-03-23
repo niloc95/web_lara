@@ -6,6 +6,9 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+// Add these imports if you have these resource classes
+// use App\Http\Resources\ClientResource;
+// use App\Http\Resources\AppointmentResource;
 
 class ClientController extends Controller
 {
@@ -25,11 +28,16 @@ class ClientController extends Controller
             });
         }
 
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         $clients = $query->orderBy('name')->paginate(10)->withQueryString();
         
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search', 'status'])
         ]);
     }
 
@@ -59,14 +67,18 @@ class ClientController extends Controller
 
     public function edit(Client $client)
     {
-        $this->authorize('view', $client);
+        $this->authorize('update', $client);
+        
+        // Fetch the client's appointments
+        $appointments = $client->appointments()
+            ->with(['service:id,name,color']) // Only select needed fields
+            ->latest()
+            ->get();
         
         return Inertia::render('Clients/Edit', [
             'client' => $client,
-            'appointments' => $client->appointments()
-                ->with('service')
-                ->orderBy('start_time', 'desc')
-                ->get()
+            'appointments' => $appointments,
+            // Any other data you're passing
         ]);
     }
 

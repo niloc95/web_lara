@@ -14,13 +14,59 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $query = Appointment::query()
-            ->where('user_id', Auth::id())
-            ->with(['client', 'service']);
+            ->with(['client', 'service'])
+            ->where('user_id', Auth::id());
         
-        $appointments = $query->orderBy('start_time', 'desc')->paginate(10);
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('client', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%");
+                })
+                ->orWhereHas('service', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        // Apply date range filter
+        if ($request->filled('dateRange')) {
+            switch ($request->dateRange) {
+                case 'today':
+                    $query->whereDate('start_time', now()->toDateString());
+                    break;
+                case 'week':
+                    $query->whereBetween('start_time', [
+                        now()->startOfWeek()->toDateTimeString(),
+                        now()->endOfWeek()->toDateTimeString()
+                    ]);
+                    break;
+                case 'month':
+                    $query->whereBetween('start_time', [
+                        now()->startOfMonth()->toDateTimeString(),
+                        now()->endOfMonth()->toDateTimeString()
+                    ]);
+                    break;
+                // 'all' or default: no date filtering
+            }
+        }
+        
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Default sort by start_time descending
+        $query->orderBy('start_time', 'desc');
+        
+        $appointments = $query->paginate(10)->withQueryString();
         
         return Inertia::render('Appointments/Index', [
-            'appointments' => $appointments
+            'appointments' => $appointments,
+            'filters' => $request->only(['search', 'dateRange', 'status'])
         ]);
     }
 
@@ -107,16 +153,16 @@ class AppointmentController extends Controller
 
     public function updateStatus(Appointment $appointment, Request $request)
     {
-        $this->authorize('update', $appointment);
-        
-        $validated = $request->validate([
-            'status' => ['required', 'string', 'in:pending,confirmed,completed,cancelled'],
+        // Validate
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,completed,cancelled'
         ]);
         
-        $appointment->update([
-            'status' => $validated['status']
-        ]);
+        // Update
+        $appointment->status = $request->status;
+        $appointment->save();
         
-        return back()->with('success', 'Appointment status updated successfully');
+        // Return proper response
+        return response()->json(['success' => true]);
     }
 }

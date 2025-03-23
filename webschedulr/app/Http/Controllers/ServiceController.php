@@ -150,4 +150,99 @@ class ServiceController extends Controller
                 : 'Service has been deactivated.'
         );
     }
+
+    /**
+     * Display the specified service.
+     *
+     * @param  \App\Models\Service  $service
+     * @return \Inertia\Response
+     */
+    public function show(Service $service)
+    {
+        $perPage = 10;
+        $appointments = Appointment::where('service_id', $service->id)
+            ->with(['client', 'user'])
+            ->latest()
+            ->paginate($perPage);
+        
+        // Create custom pagination with just what's needed
+        $currentPage = $appointments->currentPage();
+        $lastPage = $appointments->lastPage();
+        
+        // Generate only the page links we actually need
+        $links = [];
+        
+        // Previous link
+        $links[] = [
+            'url' => $currentPage > 1 ? $appointments->url($currentPage - 1) : null,
+            'label' => '&laquo; Previous',
+            'active' => false
+        ];
+        
+        // First page
+        $links[] = [
+            'url' => $appointments->url(1),
+            'label' => '1',
+            'active' => $currentPage == 1
+        ];
+        
+        // Add "..." if needed after first page
+        if ($currentPage > 4) {
+            $links[] = [
+                'url' => null, 
+                'label' => '...', 
+                'active' => false
+            ];
+        }
+        
+        // Pages around current page
+        for ($i = max(2, $currentPage - 2); $i <= min($lastPage - 1, $currentPage + 2); $i++) {
+            $links[] = [
+                'url' => $appointments->url($i),
+                'label' => (string)$i,
+                'active' => $currentPage == $i
+            ];
+        }
+        
+        // Add "..." if needed before last page
+        if ($currentPage < $lastPage - 3) {
+            $links[] = [
+                'url' => null, 
+                'label' => '...', 
+                'active' => false
+            ];
+        }
+        
+        // Last page (if not first page)
+        if ($lastPage > 1) {
+            $links[] = [
+                'url' => $appointments->url($lastPage),
+                'label' => (string)$lastPage,
+                'active' => $currentPage == $lastPage
+            ];
+        }
+        
+        // Next link
+        $links[] = [
+            'url' => $currentPage < $lastPage ? $appointments->url($currentPage + 1) : null,
+            'label' => 'Next &raquo;',
+            'active' => false
+        ];
+        
+        // Replace the standard links with our optimized version
+        $paginationArray = $appointments->toArray();
+        $paginationArray['links'] = $links;
+        
+        return Inertia::render('Services/Show', [
+            'service' => $service,
+            'appointments' => $paginationArray,
+            'stats' => [
+                'total_appointments' => Appointment::where('service_id', $service->id)->count(),
+                'completed_appointments' => Appointment::where('service_id', $service->id)->where('status', 'completed')->count(),
+                'upcoming_appointments' => Appointment::where('service_id', $service->id)
+                    ->where('start_time', '>=', now())
+                    ->count()
+            ]
+        ]);
+    }
 }

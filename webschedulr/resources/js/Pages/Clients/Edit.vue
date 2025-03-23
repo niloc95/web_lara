@@ -1,9 +1,10 @@
 <!-- resources/js/Pages/Clients/Edit.vue -->
 <template>
-  <AppLayout title="Edit Client">
+  <AppLayout :title="`Edit Client: ${client.name}`">
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+        <!-- Client Edit Form Section -->
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6">
           <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-semibold">Edit Client</h1>
             <Link :href="route('clients.index')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition">
@@ -56,41 +57,6 @@
               </div>
             </div>
             
-            <!-- Client Appointment History -->
-            <div v-if="appointments && appointments.length > 0" class="mt-8 pt-8 border-t border-gray-200">
-              <h2 class="text-lg font-medium text-gray-900 mb-4">Appointment History</h2>
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="appointment in appointments" :key="appointment.id" class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {{ formatDateTime(appointment.start_time) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {{ appointment.service?.name || 'N/A' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span :class="getStatusClass(appointment.status)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                        {{ appointment.status }}
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link :href="route('appointments.edit', appointment.id)" class="text-indigo-600 hover:text-indigo-900">
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
             <div class="mt-6 flex justify-between">
               <button @click.prevent="confirmDelete" type="button" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition">
                 Delete Client
@@ -101,6 +67,100 @@
               </button>
             </div>
           </form>
+        </div>
+        
+        <!-- Appointment History Section (same as Show.vue) -->
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-6">
+          <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="font-semibold text-lg text-gray-800">Appointment History</h2>
+            <Link :href="route('appointments.create', { client_id: client.id })" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              New Appointment
+            </Link>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="appointment in appointments" :key="appointment.id" class="hover:bg-gray-50">
+                  <!-- Time Cell - Links to Calendar Day View -->
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <Link 
+                      :href="route('calendar.day', { date: formatDateYmd(appointment.start_time) })"
+                      class="hover:text-indigo-600 hover:underline transition-colors flex items-center cursor-pointer"
+                    >
+                      {{ formatDateTime(appointment.start_time) }}
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </Link>
+                  </td>
+                  
+                  <!-- Service Cell - Links to Service Detail -->
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <Link 
+                      v-if="appointment.service?.id"
+                      :href="route('services.show', appointment.service.id)"
+                      class="hover:text-indigo-600 hover:underline transition-colors flex items-center"
+                    >
+                      <span 
+                        v-if="appointment.service?.color" 
+                        class="inline-block w-3 h-3 rounded-full mr-2" 
+                        :style="{ backgroundColor: appointment.service.color }"
+                      ></span>
+                      {{ appointment.service?.name || 'N/A' }}
+                    </Link>
+                    <span v-else>
+                      <span 
+                        v-if="appointment.service?.color" 
+                        class="inline-block w-3 h-3 rounded-full mr-2" 
+                        :style="{ backgroundColor: appointment.service.color }"
+                      ></span>
+                      {{ appointment.service?.name || 'N/A' }}
+                    </span>
+                  </td>
+                  
+                  <!-- Status Cell - With dropdown -->
+                  <td class="px-6 py-4 whitespace-nowrap relative">
+                    <button 
+                      @click.stop="toggleDropdown(appointment.id)" 
+                      :id="`dropdown-btn-${appointment.id}`"
+                      class="relative inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium w-auto cursor-pointer"
+                      :class="getStatusClass(appointment.status)"
+                    >
+                      {{ capitalize(appointment.status) }}
+                      <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <!-- Empty state -->
+            <div v-if="appointments.length === 0" class="text-center py-12">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No appointments</h3>
+              <p class="mt-1 text-sm text-gray-500">This client doesn't have any appointments yet.</p>
+              <div class="mt-6">
+                <Link :href="route('appointments.create', { client_id: client.id })" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                  <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                  </svg>
+                  New Appointment
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -120,13 +180,40 @@
         </div>
       </div>
     </div>
+    
+    <!-- Add the dropdown teleport section -->
+    <Teleport to="body">
+      <div 
+        v-for="appointment in appointments" 
+        :key="`dropdown-${appointment.id}`"
+        :style="getDropdownPosition(appointment.id)"
+        class="absolute z-50"
+        v-show="activeDropdown === appointment.id"
+      >
+        <div class="bg-white shadow-lg rounded-md ring-1 ring-black ring-opacity-5 overflow-hidden">
+          <div role="menu" aria-orientation="vertical" class="py-1">
+            <button 
+              v-for="status in ['pending', 'confirmed', 'completed', 'cancelled']" 
+              :key="status"
+              @click="updateStatus(appointment.id, status)"
+              class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              :class="{ 'font-semibold': appointment.status === status }"
+            >
+              {{ capitalize(status) }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </AppLayout>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useForm, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { format } from 'date-fns';
+import axios from 'axios';
 
 const props = defineProps({
   client: Object,
@@ -170,5 +257,101 @@ function getStatusClass(status) {
     case 'pending':
     default: return 'bg-yellow-100 text-yellow-800';
   }
+}
+
+// Store initial appointments
+const appointments = ref(props.appointments || []);
+const isLoading = ref(false);
+const currentPage = ref(1);
+const hasMoreAppointments = ref(true);
+
+// Function to load more appointments when needed
+function loadMoreAppointments() {
+  if (!hasMoreAppointments.value || isLoading.value) return;
+  
+  isLoading.value = true;
+  axios.get(route('api.clients.appointments', props.client.id), {
+    params: { page: currentPage.value + 1 }
+  })
+  .then(response => {
+    if (response.data.length === 0) {
+      hasMoreAppointments.value = false;
+    } else {
+      appointments.value = [...appointments.value, ...response.data];
+      currentPage.value++;
+    }
+    isLoading.value = false;
+  });
+}
+
+// Status dropdown functionality
+const activeDropdown = ref(null);
+
+function formatDateYmd(dateString) {
+  return format(new Date(dateString), 'yyyy-MM-dd');
+}
+
+function capitalize(string) {
+  if (!string) return '';
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function toggleDropdown(id) {
+  if (activeDropdown.value === id) {
+    activeDropdown.value = null;
+    togglePageScroll(false);
+  } else {
+    activeDropdown.value = id;
+    togglePageScroll(true);
+  }
+}
+
+function getDropdownPosition(appointmentId) {
+  if (activeDropdown.value !== appointmentId) return {};
+  
+  const button = document.getElementById(`dropdown-btn-${appointmentId}`);
+  if (!button) return {};
+  
+  const rect = button.getBoundingClientRect();
+  return {
+    top: `${rect.bottom + window.scrollY + 5}px`,
+    left: `${rect.left + window.scrollX}px`
+  };
+}
+
+function togglePageScroll(disable) {
+  if (disable) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+}
+
+function updateStatus(appointmentId, status) {
+  // Find the appointment in the array
+  const appointmentIndex = props.appointments.findIndex(a => a.id === appointmentId);
+  if (appointmentIndex === -1) return;
+  
+  // Store the old status in case we need to revert
+  const oldStatus = props.appointments[appointmentIndex].status;
+  
+  // Optimistically update the UI
+  props.appointments[appointmentIndex].status = status;
+  
+  // Close the dropdown
+  activeDropdown.value = null;
+  togglePageScroll(false);
+  
+  // Make the actual API request
+  axios.patch(route('appointments.status', appointmentId), { 
+    status,
+    _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+  })
+  .catch(error => {
+    // If there was an error, revert to the old status
+    props.appointments[appointmentIndex].status = oldStatus;
+    console.error('Error updating status:', error);
+    alert('Failed to update status: ' + (error.response?.data?.message || 'Unknown error'));
+  });
 }
 </script>
