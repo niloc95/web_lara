@@ -1,0 +1,34 @@
+/* resources/css/components/dashboard.css */
+@layer components {
+  .stats-card {
+    @apply bg-white rounded-lg shadow-md p-5 flex flex-col;
+  }
+  
+  .stats-value {
+    @apply text-2xl font-bold mt-3;
+  }
+  
+  .stats-icon {
+    @apply text-lg opacity-70;
+  }
+  
+  .dashboard-card {
+    @apply bg-white overflow-hidden shadow-xl rounded-lg;
+  }
+  
+  .dashboard-card-header {
+    @apply p-4 border-b border-gray-200 flex justify-between items-center;
+  }
+  
+  .dashboard-card-title {
+    @apply font-semibold text-lg text-gray-800;
+  }
+  
+  .activity-item {
+    @apply flex py-3 border-b border-gray-200;
+  }
+  
+  .dropdown-menu {
+    @apply fixed z-50 bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none w-56;
+  }
+}
