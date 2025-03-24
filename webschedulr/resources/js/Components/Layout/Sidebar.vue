@@ -1,6 +1,6 @@
 <!-- resources/js/Components/Layout/Sidebar.vue -->
 <template>
-  <aside class="w-[72px] bg-white border-r border-neutral-100 flex flex-col items-center py-5">
+  <aside class="w-[72px] bg-white dark:bg-neutral-900 border-r border-neutral-100 dark:border-neutral-800 flex flex-col items-center py-5">
     <Tooltip 
       v-for="(item, index) in navigationItems" 
       :key="index"
@@ -11,12 +11,12 @@
         :class="[
           'w-full py-4 flex flex-col items-center text-xs font-medium transition-colors relative',
           item.active 
-            ? 'text-primary-600' 
-            : 'text-neutral-500 hover:text-primary-600'
+            ? 'text-primary-600 dark:text-primary-400' 
+            : 'text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400'
         ]"
       >
         <!-- Active indicator -->
-        <div v-if="item.active" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-primary-600 rounded-r"></div>
+        <div v-if="item.active" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-primary-600 dark:bg-primary-400 rounded-r"></div>
         
         <div class="text-[20px] mb-1">
           <i :class="['fas', item.icon]"></i>

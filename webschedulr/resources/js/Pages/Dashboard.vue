@@ -48,29 +48,29 @@
     <!-- Activity & Charts Grid with tooltips -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <!-- Recent Sales Summary (Span 2 cols) -->
-      <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+      <div class="lg:col-span-2 bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-neutral-900/30 p-6">
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-lg font-semibold">Recent Sales</h2>
-            <p class="text-sm text-neutral-400">Last 7 days</p>
+            <h2 class="text-lg font-semibold dark:text-white">Recent Sales</h2>
+            <p class="text-sm text-neutral-400 dark:text-neutral-500">Last 7 days</p>
           </div>
           <Tooltip text="More options" position="left">
-            <button class="text-neutral-400 hover:text-neutral-600">
+            <button class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
               <i class="fas fa-ellipsis-v"></i>
             </button>
           </Tooltip>
         </div>
         
-        <div class="text-2xl font-bold mb-4">ZAR {{ stats.weekly_revenue || 0 }}</div>
+        <div class="text-2xl font-bold mb-4 dark:text-white">ZAR {{ stats.weekly_revenue || 0 }}</div>
         
         <div class="flex space-x-8 mb-6">
           <div>
-            <p class="text-sm text-neutral-400">Appointments</p>
-            <p class="text-base font-semibold">{{ stats.upcoming_appointments }}</p>
+            <p class="text-sm text-neutral-400 dark:text-neutral-500">Appointments</p>
+            <p class="text-base font-semibold dark:text-neutral-200">{{ stats.upcoming_appointments }}</p>
           </div>
           <div>
-            <p class="text-sm text-neutral-400">Appointments value</p>
-            <p class="text-base font-semibold">ZAR {{ stats.weekly_revenue || 0 }}</p>
+            <p class="text-sm text-neutral-400 dark:text-neutral-500">Appointments value</p>
+            <p class="text-base font-semibold dark:text-neutral-200">ZAR {{ stats.weekly_revenue || 0 }}</p>
           </div>
         </div>
         
@@ -86,11 +86,11 @@
       </div>
       
       <!-- Status Chart with tooltip -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-neutral-900/30 p-6">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-semibold">Appointments by Status</h2>
+          <h2 class="text-lg font-semibold dark:text-white">Appointments by Status</h2>
           <Tooltip text="More options" position="left">
-            <button class="text-neutral-400 hover:text-neutral-600">
+            <button class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
               <i class="fas fa-ellipsis-v"></i>
             </button>
           </Tooltip>
@@ -111,8 +111,8 @@
     <!-- Activity Log & Services Grid with tooltips -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Appointment Activity with tooltips for status -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Appointments Activity</h2>
+      <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-neutral-900/30 p-6">
+        <h2 class="text-lg font-semibold dark:text-white mb-4">Appointments Activity</h2>
         
         <div v-if="todaysAppointments && todaysAppointments.length > 0">
           <div 
@@ -121,12 +121,12 @@
             class="py-4 flex border-b border-neutral-100 last:border-0"
           >
             <div class="flex flex-col items-center mr-4 w-10">
-              <div class="text-base font-semibold">{{ formatDate(appointment.start_time, 'dd') }}</div>
-              <div class="text-xs text-neutral-400">{{ formatDate(appointment.start_time, 'MMM') }}</div>
+              <div class="text-base font-semibold dark:text-white">{{ formatDate(appointment.start_time, 'dd') }}</div>
+              <div class="text-xs text-neutral-400 dark:text-neutral-500">{{ formatDate(appointment.start_time, 'MMM') }}</div>
             </div>
             
             <div class="flex-1">
-              <div class="text-sm text-neutral-500 mb-1">
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mb-1">
                 {{ formatDate(appointment.start_time, 'EEE, dd MMM yyyy HH:mm') }}
                 <Tooltip :text="getStatusDescription(appointment.status)" position="right">
                   <span class="ml-2 text-xs font-medium" :class="getStatusColorClass(appointment.status)">
@@ -134,59 +134,59 @@
                   </span>
                 </Tooltip>
               </div>
-              <div class="font-semibold mb-1">{{ appointment.service?.name || 'Service' }}</div>
-              <div class="text-sm text-neutral-500">
+              <div class="font-semibold dark:text-white mb-1">{{ appointment.service?.name || 'Service' }}</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400">
                 {{ appointment.client?.name || 'Client' }}, 
                 {{ appointment.duration || '60' }}min with 
                 {{ appointment.staff?.name || 'Staff' }}
               </div>
             </div>
             
-            <div class="font-semibold self-center">
+            <div class="font-semibold dark:text-white self-center">
               ZAR {{ appointment.price || '0' }}
             </div>
           </div>
         </div>
         
         <div v-else class="py-10 flex flex-col items-center justify-center text-center">
-          <div class="text-4xl text-neutral-300 mb-4">
+          <div class="text-4xl text-neutral-300 dark:text-neutral-500 mb-4">
             <i class="fas fa-calendar"></i>
           </div>
-          <h3 class="text-lg font-semibold mb-2">No Recent Activity</h3>
-          <p class="text-sm text-neutral-500 max-w-xs">
+          <h3 class="text-lg font-semibold dark:text-white mb-2">No Recent Activity</h3>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs">
             Create appointments to see your activity history here
           </p>
         </div>
       </div>
       
       <!-- Top Services -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Top Services</h2>
+      <div class="bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-neutral-900/30 p-6">
+        <h2 class="text-lg font-semibold dark:text-white mb-4">Top Services</h2>
         
         <table class="w-full">
           <thead>
             <tr>
-              <th class="text-left text-sm font-medium text-neutral-500 pb-3">Service</th>
-              <th class="text-left text-sm font-medium text-neutral-500 pb-3">This month</th>
-              <th class="text-left text-sm font-medium text-neutral-500 pb-3">Last month</th>
+              <th class="text-left text-sm font-medium text-neutral-500 dark:text-neutral-400 pb-3">Service</th>
+              <th class="text-left text-sm font-medium text-neutral-500 dark:text-neutral-400 pb-3">This month</th>
+              <th class="text-left text-sm font-medium text-neutral-500 dark:text-neutral-400 pb-3">Last month</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="topServices && topServices.length">
-              <td v-for="service in topServices" :key="service.name" class="py-3 border-b border-neutral-100">
-                <div class="font-medium">{{ service.name }}</div>
-                <div class="text-sm">{{ service.thisMonth }}</div>
-                <div class="text-sm">{{ service.lastMonth }}</div>
+              <td v-for="service in topServices" :key="service.name" class="py-3 border-b border-neutral-100 dark:border-neutral-700">
+                <div class="font-medium dark:text-white">{{ service.name }}</div>
+                <div class="text-sm dark:text-neutral-400">{{ service.thisMonth }}</div>
+                <div class="text-sm dark:text-neutral-400">{{ service.lastMonth }}</div>
               </td>
             </tr>
             <tr v-else>
               <td colspan="3" class="py-10">
                 <div class="flex flex-col items-center justify-center text-center">
-                  <div class="text-4xl text-neutral-300 mb-4">
+                  <div class="text-4xl text-neutral-300 dark:text-neutral-500 mb-4">
                     <i class="fas fa-chart-bar"></i>
                   </div>
-                  <h3 class="text-lg font-semibold mb-2">No Services Data</h3>
-                  <p class="text-sm text-neutral-500 max-w-xs">
+                  <h3 class="text-lg font-semibold dark:text-white mb-2">No Services Data</h3>
+                  <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs">
                     Complete appointments to see service statistics
                   </p>
                 </div>
