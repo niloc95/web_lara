@@ -1,19 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Disable all browser default tooltips */
-[title] {
-  position: relative;
-}
-
-[title]:hover::before,
-[title]:hover::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* If using tippy.js or other libraries */
-.tippy-box, .tooltip, [data-tooltip], [data-tippy-root] {
-  display: none !important;
-}
+/* resources/css/app.css */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import './components/dashboard.css';
+@import 'tailwindcss/utilities';
