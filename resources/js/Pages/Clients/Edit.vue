@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Clients/Edit.vue -->
 <template>
-  <AppLayout :title="`Edit Client: ${client.name}`">
+  <AppLayout :title="`Edit Client: ${client.name}`" :user="$page.props.auth.user">
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Client Edit Form Section -->

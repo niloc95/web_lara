@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Appointments/Index.vue -->
 <template>
-  <AppLayout title="Appointments">
+  <AppLayout title="Appointments" :user="$page.props.auth.user">
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Filters and Controls -->

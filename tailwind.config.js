@@ -17,48 +17,122 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             colors: {
+                // GitHub-inspired colorblind-friendly palette
                 primary: {
-                    DEFAULT: '#6950f3',
-                    50: '#f5f3fe',
-                    100: '#ebe7fd',
-                    200: '#d6cefb',
-                    300: '#b7a8f8',
-                    400: '#9682f4',
-                    500: '#6950f3',
-                    600: '#5a3feb',
-                    700: '#4a2dd6',
-                    800: '#3e28ae',
-                    900: '#35238d',
+                    DEFAULT: '#0969da', // GitHub blue
+                    50: '#f1f8ff',
+                    100: '#dbedff',
+                    200: '#bfdbfe',
+                    300: '#93c5fd',
+                    400: '#60a5fa',
+                    500: '#0969da',
+                    600: '#0550ae',
+                    700: '#033d8a',
+                    800: '#02326f',
+                    900: '#032654',
                 },
                 secondary: {
-                    DEFAULT: '#00a36d',
-                    50: '#e6f7f1',
-                    100: '#ceefe3',
-                    200: '#9ee0c7',
-                    300: '#6ed1ab',
-                    400: '#3ec28f',
-                    500: '#00a36d',
-                    600: '#009463',
-                    700: '#007a52',
-                    800: '#006141',
-                    900: '#004e35',
+                    DEFAULT: '#238636', // GitHub green
+                    50: '#f0fff4',
+                    100: '#dcffe4',
+                    200: '#bef5cb',
+                    300: '#85e0a3',
+                    400: '#43c663',
+                    500: '#238636',
+                    600: '#1a7f31',
+                    700: '#116329',
+                    800: '#0e4e22',
+                    900: '#09381c',
                 },
                 neutral: {
-                    DEFAULT: '#878c93',
-                    50: '#f8f8f8',
-                    100: '#e7e8e9',
-                    200: '#d1d3d5',
-                    300: '#b0b4b9',
-                    400: '#878c93',
-                    500: '#6d7278',
-                    600: '#5a5e63',
-                    700: '#47494e',
-                    800: '#343538',
-                    900: '#222',
+                    DEFAULT: '#6e7781', // GitHub neutral
+                    50: '#f6f8fa',
+                    100: '#eaeef2',
+                    200: '#d0d7de',
+                    300: '#afb8c1',
+                    400: '#8c959f',
+                    500: '#6e7781',
+                    600: '#57606a',
+                    700: '#424a53',
+                    800: '#32383f',
+                    900: '#24292f',
+                },
+                // GitHub semantic colors
+                github: {
+                    // Base UI colors
+                    bg: '#ffffff',
+                    'dark-bg': '#0d1117',
+                    text: '#24292f',
+                    'dark-text': '#e6edf3',
+                    heading: '#24292f',
+                    'dark-heading': '#f0f6fc',
+                    border: '#d0d7de',
+                    'dark-border': '#30363d',
+                    input: '#f6f8fa',
+                    'dark-input': '#0d1117',
+                    label: '#24292f',
+                    'dark-label': '#c9d1d9',
+                    
+                    // Accent colors
+                    accent: '#0969da',
+                    'dark-accent': '#58a6ff',
+                    
+                    // Status colors
+                    success: '#2da44e',
+                    'dark-success': '#3fb950',
+                    warning: '#bf8700',
+                    'dark-warning': '#d29922',
+                    error: '#cf222e',
+                    'dark-error': '#f85149',
+                    info: '#0969da',
+                    'dark-info': '#58a6ff',
+                    
+                    // Special states
+                    open: '#238636',
+                    closed: '#cf222e',
+                    merged: '#8250df',
+                    draft: '#6e7781',
+                },
+                // Storybook-friendly semantic colors
+                status: {
+                    pending: '#bf8700',
+                    confirmed: '#0969da',
+                    completed: '#238636',
+                    cancelled: '#cf222e',
                 }
             }
         }
     },
 
-    plugins: [forms],
+    plugins: [
+        forms,
+        function({ addComponents }) {
+            addComponents({
+                '.stats-card': {
+                    '@apply bg-white rounded-lg shadow-md p-5 flex flex-col': {}
+                },
+                '.stats-value': {
+                    '@apply text-2xl font-bold mt-3': {}
+                },
+                '.stats-icon': {
+                    '@apply text-lg opacity-70': {}
+                },
+                '.dashboard-card': {
+                    '@apply bg-white overflow-hidden shadow-xl rounded-lg': {}
+                },
+                '.dashboard-card-header': {
+                    '@apply p-4 border-b border-gray-200 flex justify-between items-center': {}
+                },
+                '.dashboard-card-title': {
+                    '@apply font-semibold text-lg text-gray-800': {}
+                },
+                '.activity-item': {
+                    '@apply flex py-3 border-b border-gray-200': {}
+                },
+                '.dropdown-menu': {
+                    '@apply fixed z-50 bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none w-56': {}
+                }
+            })
+        }
+    ]
 };

@@ -1,11 +1,11 @@
 <!-- resources/js/Pages/Dashboard/Index.vue -->
 <template>
   <AppLayout 
-    company-name="WebSchedulr" 
-    :user="user"
+    :user="auth.user"
     :navigation-items="sidebarItems"
     :quick-actions="quickActions"
   >
+    <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
     <!-- Stats Grid with tooltips -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
       <Tooltip text="Total upcoming appointments for the next 30 days">
@@ -51,8 +51,8 @@
       <div class="lg:col-span-2 bg-white dark:bg-neutral-800 rounded-lg shadow dark:shadow-neutral-900/30 p-6">
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-lg font-semibold dark:text-white">Recent Sales</h2>
-            <p class="text-sm text-neutral-400 dark:text-neutral-500">Last 7 days</p>
+            <h2 class="text-lg font-semibold dark:text-white">Today's Schedule</h2>
+            <p class="text-sm text-neutral-400 dark:text-neutral-500">Working hours: 8:00 AM - 4:00 PM</p>
           </div>
           <Tooltip text="More options" position="left">
             <button class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
@@ -61,27 +61,50 @@
           </Tooltip>
         </div>
         
-        <div class="text-2xl font-bold mb-4 dark:text-white">ZAR {{ stats.weekly_revenue || 0 }}</div>
+        <!-- Utilization summary -->
+        <div class="flex justify-between items-center mb-4">
+          <div class="text-xl font-bold dark:text-white">
+            ZAR {{ stats.weekly_revenue || 0 }}
+          </div>
+          
+          <div v-if="utilizationPercentage !== null" 
+               :class="[
+                 'text-xs font-medium px-2 py-1 rounded-full',
+                 utilizationClass
+               ]">
+            {{ utilizationPercentage }}% Utilized
+          </div>
+        </div>
         
         <div class="flex space-x-8 mb-6">
           <div>
             <p class="text-sm text-neutral-400 dark:text-neutral-500">Appointments</p>
-            <p class="text-base font-semibold dark:text-neutral-200">{{ stats.upcoming_appointments }}</p>
+            <p class="text-base font-semibold dark:text-neutral-200">{{ stats.today_appointments || 0 }}</p>
           </div>
           <div>
-            <p class="text-sm text-neutral-400 dark:text-neutral-500">Appointments value</p>
-            <p class="text-base font-semibold dark:text-neutral-200">ZAR {{ stats.weekly_revenue || 0 }}</p>
+            <p class="text-sm text-neutral-400 dark:text-neutral-500">Available Time</p>
+            <p class="text-base font-semibold dark:text-neutral-200">{{ availableHours }} hours</p>
           </div>
         </div>
         
+        <!-- Bar chart with vibrant colors -->
         <div class="h-64">
-          <SimpleBarChart :chart-data="{
-            labels: appointmentsByDay.labels,
-            datasets: [{ 
-              data: appointmentsByDay.data,
-              backgroundColor: '#6950f3'
-            }]
-          }" />
+          <SimpleBarChart 
+            :chartData="dailyScheduleData"
+            :utilizationData="utilizationData"
+            :showWorkingHoursSummary="false"
+            colorScheme="vibrant"
+            :options="{
+              plugins: {
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  backgroundColor: '#24292f'
+                }
+              }
+            }"
+          />
         </div>
       </div>
       
@@ -197,6 +220,29 @@
       </div>
     </div>
   </AppLayout>
+
+  <!-- Add this anywhere visible in your Dashboard.vue -->
+  <button 
+    @click="$page.props.showDebugModal = true" 
+    class="fixed bottom-4 right-4 bg-primary-500 text-white px-4 py-2 rounded-full z-50"
+  >
+    Debug Modal
+  </button>
+
+  <!-- Then add this just above the closing </template> tag -->
+  <QuickActionsMenu 
+    :is-open="$page.props.showDebugModal"
+    :actions="[
+      {
+        label: 'Test Action',
+        description: 'Just a test action',
+        icon: 'fa-bug',
+        color: 'primary',
+        href: '#'
+      }
+    ]"
+    @close="$page.props.showDebugModal = false"
+  />
 </template>
 
 <script setup>
@@ -206,48 +252,25 @@ import { format, parseISO } from 'date-fns';
 import { onMounted, onBeforeUnmount } from 'vue';
 
 // Import layout
-import AppLayout from '../Layouts/AppLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 // Import chart components
 import SimpleDoughnutChart from '../Components/Charts/SimpleDoughnutChart.vue';
 import SimpleBarChart from '../Components/Charts/SimpleBarChart.vue';
 
 // Import dashboard components
-import StatsCard from '../Components/Dashboard/StatsCard.vue';
+import StatsCard from '@/Components/Dashboard/StatsCard.vue';
 import AppointmentsTable from '../Components/Dashboard/AppointmentsTable.vue';
-import Tooltip from '../Components/UI/Tooltip.vue';
+import Tooltip from '@/Components/UI/Tooltip.vue';
 
 // Props
 const props = defineProps({
-  user: Object,
-  stats: {
-    type: Object,
-    default: () => ({
-      upcoming_appointments: 0,
-      today_appointments: 0,
-      weekly_revenue: 0,
-      active_clients: 0
-    })
-  },
-  todaysAppointments: {
-    type: Array,
-    default: () => []
-  },
-  statusStats: {
-    type: Object,
-    default: () => ({
-      labels: [],
-      data: [],
-      backgrounds: []
-    })
-  },
-  appointmentsByDay: {
-    type: Object,
-    default: () => ({
-      labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      data: [0, 0, 0, 0, 0, 0, 0]
-    })
-  }
+  auth: Object,
+  stats: Object,
+  todaysAppointments: Array,
+  statusStats: Object,
+  appointmentsByDay: Object,
+  topServices: Array
 });
 
 // Computed properties - MUST BE DEFINED BEFORE THEY ARE USED
@@ -548,4 +571,104 @@ function getStatusDescription(status) {
       return 'Unknown status';
   }
 }
+
+// Transform your appointments into chart data
+const dailyScheduleData = computed(() => {
+  // Format your appointments into the expected chart data format
+  const hours = ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
+  const appointmentCounts = hours.map(hour => {
+    const hourNumber = parseInt(hour);
+    // Count appointments starting at this hour
+    return props.todaysAppointments.filter(appt => {
+      const apptHour = new Date(appt.start_time).getHours();
+      return apptHour === hourNumber;
+    }).length;
+  });
+  
+  return {
+    labels: hours,
+    datasets: [
+      {
+        label: 'Appointments',
+        data: appointmentCounts,
+        borderRadius: 4
+      }
+    ]
+  };
+});
+
+// Calculate hours utilized per hour of the day
+const utilizationData = computed(() => {
+  const hourUtilization = {};
+  
+  // Initialize hours from 8-16
+  for (let i = 8; i < 16; i++) {
+    hourUtilization[i] = 0;
+  }
+  
+  // Calculate utilization for each appointment
+  props.todaysAppointments.forEach(appt => {
+    const startTime = new Date(appt.start_time);
+    const endTime = new Date(appt.end_time);
+    const startHour = startTime.getHours();
+    const startMinuteFraction = startTime.getMinutes() / 60;
+    const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+    
+    // Add the appointment duration to the correct hour bucket
+    let remainingDuration = durationHours;
+    let currentHour = startHour;
+    let currentMinuteFraction = startMinuteFraction;
+    
+    while (remainingDuration > 0 && currentHour < 16) {
+      // How much of this hour is used
+      const hoursInCurrentSlot = Math.min(1 - currentMinuteFraction, remainingDuration);
+      
+      // Add to utilization
+      if (currentHour >= 8) {
+        hourUtilization[currentHour] = (hourUtilization[currentHour] || 0) + hoursInCurrentSlot;
+      }
+      
+      // Move to next hour
+      remainingDuration -= hoursInCurrentSlot;
+      currentHour++;
+      currentMinuteFraction = 0; // Reset for subsequent hours
+    }
+  });
+  
+  return hourUtilization;
+});
+
+// Add this computed property for utilization color
+const utilizationPercentage = computed(() => {
+  if (!utilizationData.value) return null;
+  
+  const totalWorkingHours = 8; // 8:00 AM to 4:00 PM
+  const totalBookedHours = Object.values(utilizationData.value).reduce((sum, hours) => sum + hours, 0);
+  
+  // Calculate percentage of working hours that are booked
+  return Math.round((totalBookedHours / totalWorkingHours) * 100);
+});
+
+// Add a CSS class computed property for utilization badge
+const utilizationClass = computed(() => {
+  if (utilizationPercentage.value === null) return '';
+  
+  if (utilizationPercentage.value < 30) {
+    return 'bg-github-success/20 text-github-success dark:bg-github-dark-success/20 dark:text-github-dark-success';
+  } else if (utilizationPercentage.value < 70) {
+    return 'bg-github-warning/20 text-github-warning dark:bg-github-dark-warning/20 dark:text-github-dark-warning';
+  } else {
+    return 'bg-github-error/20 text-github-error dark:bg-github-dark-error/20 dark:text-github-dark-error';
+  }
+});
+
+// Calculate available hours
+const availableHours = computed(() => {
+  if (!utilizationData.value) return 8; // Default working hours (8 to 16)
+  
+  const totalWorkingHours = 8; // 8:00 AM to 4:00 PM
+  const totalBookedHours = Object.values(utilizationData.value).reduce((sum, hours) => sum + hours, 0);
+  
+  return Math.max(0, Math.round((totalWorkingHours - totalBookedHours) * 10) / 10); // Round to 1 decimal
+});
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <AppLayout title="Services">
+  <AppLayout :user="$page.props.auth.user">
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+        <div class="bg-white dark:bg-neutral-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-semibold">Services</h1>
             <Link :href="route('services.create')" 
@@ -93,9 +93,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+
+const page = usePage();
 
 const props = defineProps({
   services: Array,

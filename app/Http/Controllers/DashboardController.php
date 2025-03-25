@@ -13,6 +13,19 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $dashboardData = $this->getDashboardStats();
+        
+        return Inertia::render('Dashboard', [
+            'stats' => $dashboardData['stats'],
+            'todaysAppointments' => $dashboardData['todaysAppointments'],
+            'appointmentsByDay' => $dashboardData['appointmentsByDay'],
+            'statusStats' => $dashboardData['statusStats'],
+            'topServices' => [] 
+        ]);
+    }
+
+    private function getDashboardStats()
+    {
         $user = Auth::user();
         
         // Initialize with empty data to prevent errors
@@ -100,23 +113,12 @@ class DashboardController extends Controller
             \Log::error('Dashboard data error: ' . $e->getMessage());
         }
         
-        return Inertia::render('Dashboard', [
-            'stats' => [
-                'upcoming_appointments' => 10,
-                'today_appointments' => 5,
-                'tomorrow_appointments' => 3,
-            ],
+        return [
+            'stats' => $stats,
             'todaysAppointments' => $todaysAppointments,
-            'statusStats' => [
-                'labels' => ['Pending', 'Confirmed', 'Completed', 'Cancelled'],
-                'data' => [5, 10, 3, 2],
-                'backgrounds' => ['#f6c23e', '#1cc88a', '#4e73df', '#e74a3b']
-            ],
-            'appointmentsByDay' => [
-                'labels' => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                'data' => [5, 10, 8, 12, 8, 6, 4]
-            ],
+            'statusStats' => $statusStats,
+            'appointmentsByDay' => $appointmentsByDay,
             'recentClients' => $recentClients,
-        ]);
+        ];
     }
 }
