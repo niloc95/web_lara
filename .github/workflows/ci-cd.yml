@@ -1,0 +1,188 @@
+name: WebSchedulr CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  laravel-tests:
+    name: Laravel Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: webschedulr_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, dom, fileinfo, mysql, zip, pcntl, exif, bcmath, gd
+        coverage: xdebug
+    
+    - name: Copy .env
+      run: cp .env.example .env
+    
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+    
+    - name: Cache Composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+    
+    - name: Install Composer Dependencies
+      run: composer install --prefer-dist --no-interaction --no-progress
+    
+    - name: Generate key
+      run: php artisan key:generate
+    
+    - name: Set Directory Permissions
+      run: chmod -R 777 storage bootstrap/cache
+    
+    - name: Configure Database
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=webschedulr_test" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=password" >> .env
+    
+    - name: Run Migrations
+      run: php artisan migrate --force
+    
+    - name: Run PHPUnit Tests
+      run: vendor/bin/phpunit --coverage-clover=coverage.xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+      
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Cache NPM dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    - name: Install Dependencies
+      run: npm ci
+    
+    - name: Run ESLint
+      run: npx eslint 'resources/js/**/*.{js,vue}' || true
+    
+    - name: Build Assets
+      run: npm run build
+    
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: public/build
+      
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [laravel-tests, frontend-build]
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+    
+    - name: Deploy to Staging
+      run: |
+        # Add host key for the server
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+        
+        # Deploy using rsync
+        rsync -avz --exclude=".git/" \
+                   --exclude=".github/" \
+                   --exclude="node_modules/" \
+                   --exclude="tests/" \
+                   --exclude=".env" \
+                   ./ ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PATH }}
+        
+        # Run deployment commands on server
+        ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "cd ${{ secrets.STAGING_PATH }} && \
+          composer install --no-dev --optimize-autoloader && \
+          cp .env.staging .env && \
+          php artisan migrate --force && \
+          php artisan config:cache && \
+          php artisan route:cache && \
+          php artisan view:cache && \
+          php artisan storage:link"
+  
+  deploy-production:
+    name: Deploy to Production
+    needs: [laravel-tests, frontend-build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+    
+    - name: Deploy to Production
+      run: |
+        # Add host key for the server
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+        
+        # Deploy using rsync
+        rsync -avz --exclude=".git/" \
+                   --exclude=".github/" \
+                   --exclude="node_modules/" \
+                   --exclude="vendor/" \
+                   --exclude="tests/" \
+                   --exclude=".env" \
+                   ./ ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}
+        
+        # Run deployment commands on server
+        ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} "cd ${{ secrets.PRODUCTION_PATH }} && \
+          composer install --no-dev --optimize-autoloader && \
+          php artisan migrate --force && \
+          php artisan config:cache && \
+          php artisan route:cache && \
+          php artisan view:cache && \
+          php artisan storage:link && \
+          php artisan optimize" 
