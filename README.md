@@ -1,11 +1,5 @@
 
-### How to Download:
-1. Copy the content above.
-2. Open a text editor (e.g., Notepad, VS Code).
-3. Paste the content and save the file as `README.md`.
-4. Alternatively, you can use the following command in a terminal to create the file directly:
-   ```bash
-   echo '# WebSchedulr
+# WebSchedulr
 
    A modern, full-featured appointment scheduling system built with Laravel and Vue.js. WebSchedulr helps service providers manage appointments, clients, and services with an intuitive user interface.
 
@@ -130,4 +124,3 @@
 
    ## Support
    For support, please open an issue in the GitHub repository or contact `za_admin@frontend.co.za`.
-   ' > README.md
