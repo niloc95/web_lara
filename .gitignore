@@ -1,23 +1,22 @@
-# Environment variables
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+/notneeded
 .env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
 
-# Composer packages
-/vendor/
-
-# Node modules
-/node_modules/
-
-# Built assets
-/assets/
-
-# Logs
-/logs/
-
-# IDE specific files
-.idea/
-.vscode/
-*.sublime-*
-
-# OS specific files
-.DS_Store
-Thumbs.db
+*storybook.log
