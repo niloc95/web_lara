@@ -15,14 +15,14 @@
     >
       <div v-if="show" 
         :class="[
-          'absolute z-50 px-2 py-1 text-xs font-medium text-white bg-neutral-800 rounded whitespace-nowrap',
+          'absolute z-50 px-2 py-1 text-xs font-medium text-white bg-neutral-800 dark:bg-neutral-700 rounded whitespace-nowrap',
           positionClasses
         ]"
       >
         {{ text }}
         <!-- Arrow -->
         <div :class="[
-          'absolute w-2 h-2 bg-neutral-800 transform rotate-45',
+          'absolute w-2 h-2 bg-neutral-800 dark:bg-neutral-700 transform rotate-45',
           arrowPositionClasses
         ]"></div>
       </div>

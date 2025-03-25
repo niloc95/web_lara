@@ -42,7 +42,7 @@ const showQuickActions = ref(false);
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-neutral-50">
+  <div class="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
     <!-- Top Header -->
     <TopHeader 
       :company-name="companyName" 

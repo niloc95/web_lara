@@ -1,25 +1,28 @@
 <!-- resources/js/Components/Layout/TopHeader.vue -->
 <template>
-  <header class="w-full bg-white border-b border-neutral-100 h-16 px-6 flex items-center justify-between z-10">
+  <header class="w-full bg-white dark:bg-neutral-900 border-b border-neutral-100 dark:border-neutral-800 h-16 px-6 flex items-center justify-between z-10">
     <div class="flex items-center">
       <div v-if="logoUrl" class="h-10 w-auto">
         <img :src="logoUrl" alt="Company Logo" class="h-full w-auto">
       </div>
-      <div v-else class="h-10 w-10 bg-primary-100 text-primary-600 rounded-md flex items-center justify-center font-bold text-lg">
+      <div v-else class="h-10 w-10 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-300 rounded-md flex items-center justify-center font-bold text-lg">
         {{ companyInitials }}
       </div>
-      <h1 class="ml-3 text-lg font-bold text-primary-600">{{ companyName }}</h1>
+      <h1 class="ml-3 text-lg font-bold text-primary-600 dark:text-primary-400">{{ companyName }}</h1>
     </div>
     
     <div class="flex items-center space-x-5">
-      <button class="w-10 h-10 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50">
+      <!-- Dark Mode Toggle -->
+      <DarkModeToggle />
+      
+      <button class="w-10 h-10 rounded-full flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800">
         <i class="fas fa-search text-lg"></i>
       </button>
-      <button class="w-10 h-10 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 relative">
+      <button class="w-10 h-10 rounded-full flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 relative">
         <i class="fas fa-bullhorn text-lg"></i>
         <span class="absolute -top-1 -right-1 h-5 w-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
       </button>
-      <button class="w-10 h-10 rounded-full flex items-center justify-center text-neutral-500 hover:bg-neutral-50 relative">
+      <button class="w-10 h-10 rounded-full flex items-center justify-center text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 relative">
         <i class="fas fa-bell text-lg"></i>
         <span class="absolute -top-1 -right-1 h-5 w-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center">2</span>
       </button>
@@ -57,6 +60,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import DarkModeToggle from '../UI/DarkModeToggle.vue';
 
 const props = defineProps({
   companyName: {

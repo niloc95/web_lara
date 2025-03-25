@@ -8,6 +8,18 @@ setup(app => {
   app.config.globalProperties.route = (name, params = {}) => {
     return '#'; // Return a dummy URL for stories
   };
+
+  // Add dark mode support
+  app.config.globalProperties.toggleDarkMode = () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('color-theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('color-theme', 'dark');
+    }
+  }
 });
 
 /** @type { import('@storybook/vue3').Preview } */
@@ -34,6 +46,10 @@ const preview = {
         },
       ],
     },
+    // Dark mode toolbar
+    darkMode: {
+      stylePreview: true, // Adds a dark mode toggle in the toolbar
+    }
   },
 };
 
