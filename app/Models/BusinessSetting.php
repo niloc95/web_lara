@@ -19,5 +19,11 @@ class BusinessSetting extends Model
         'appointment_lead_time',
         'appointment_duration',
         'notification_email',
+        'logo', // Make sure 'logo' is included here
+    ];
+
+    protected $casts = [
+        'business_hours' => 'array',
+        'notification_email' => 'boolean',
     ];
 }

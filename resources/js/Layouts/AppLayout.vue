@@ -22,11 +22,12 @@ export default {
 </script>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import TopHeader from '@/Components/Layout/TopHeader.vue';
 import Sidebar from '@/Components/Layout/Sidebar.vue';
 import QuickActionsMenu from '@/Components/Dashboard/QuickActionsMenu.vue';
+import eventBus from '@/eventBus';
 
 // Debug the imports
 console.log('QuickActionsMenu loaded:', !!QuickActionsMenu);
@@ -112,6 +113,36 @@ const quickActions = [
     href: route('clients.create')
   }
 ];
+
+// Listen for business name changes
+onMounted(() => {
+  eventBus.on('business-name-changed', updateBusinessName);
+  eventBus.on('business-logo-changed', updateBusinessLogo);
+});
+
+onUnmounted(() => {
+  eventBus.off('business-name-changed', updateBusinessName);
+  eventBus.off('business-logo-changed', updateBusinessLogo);
+});
+
+function updateBusinessName(newName) {
+  // Update the business name in your layout
+  // This depends on how your layout is structured
+  console.log('Business name updated to:', newName);
+  
+  // If you're using Inertia.js shared props, you might need to:
+  // usePage().props.value.appName = newName;
+  
+  // Or update your own reactive variable
+}
+
+function updateBusinessLogo(newLogoPath) {
+  // Update the logo in your layout
+  console.log('Business logo updated to:', newLogoPath);
+  
+  // If you're using a reactive variable for the logo:
+  // logo.value = newLogoPath;
+}
 </script>
 
 <template>
@@ -148,4 +179,5 @@ const quickActions = [
       @close="showQuickActions = false"
     />
   </div>
+
 </template>
