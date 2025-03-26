@@ -70,6 +70,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // API Clients
     Route::post('/api/clients', [App\Http\Controllers\ClientApiController::class, 'store'])
         ->name('clients.api.store');
+
+    // Settings routes
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/', [App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/hours', [App\Http\Controllers\SettingsController::class, 'updateBusinessHours'])->name('settings.update.hours');
+    });
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/general', [App\Http\Controllers\SettingsController::class, 'updateGeneral'])->name('settings.update.general');
+    Route::post('/settings/hours', [App\Http\Controllers\SettingsController::class, 'updateBusinessHours'])->name('settings.update.hours');
+    Route::post('/settings/logo', [App\Http\Controllers\SettingsController::class, 'updateLogo'])->name('settings.update.logo');
 });
 
 require __DIR__.'/auth.php';

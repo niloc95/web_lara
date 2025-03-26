@@ -8,10 +8,23 @@
       <div v-else class="h-10 w-10 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-300 rounded-md flex items-center justify-center font-bold text-lg">
         {{ companyInitials }}
       </div>
-      <!-- Company name now directly reads from Inertia props -->
-      <h1 class="ml-3 text-lg font-bold text-primary-600 dark:text-primary-400">
-        {{ businessName }}
-      </h1>
+      
+      <!-- Enhanced business name and powered by section -->
+      <div class="ml-3 flex flex-col">
+        <h1 class="text-xl font-bold text-primary-600 dark:text-primary-400 tracking-tight leading-tight">
+          {{ businessName }}
+        </h1>
+        <a 
+          href="https://webschedulr.co.za" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 flex items-center"
+        >
+          <span>powered by</span>
+          <span class="font-medium ml-1">webSchedulr</span>
+          
+        </a>
+      </div>
     </div>
     
     <div class="flex items-center space-x-5">

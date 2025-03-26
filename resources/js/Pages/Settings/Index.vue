@@ -1,6 +1,12 @@
 <!-- resources/js/Pages/Settings/Index.vue -->
 <template>
   <AppLayout title="Settings" :user="$page.props.auth.user">
+    <template #header>
+      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        Settings
+      </h2>
+    </template>
+
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
@@ -23,51 +29,6 @@
                   </div>
                 </div>
                 
-                <!-- Business Logo -->
-                <div>
-                  <label class="block font-medium text-sm text-gray-700">
-                    Business Logo
-                  </label>
-                  <div class="mt-1 flex items-center">
-                    <!-- Logo preview -->
-                    <div v-if="logoPreview || form.logo" class="mr-4 h-20 w-20 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                      <img :src="logoPreview || `/storage/${form.logo}`" alt="Business logo preview" class="h-full w-full object-contain">
-                    </div>
-                    <div v-else class="mr-4 h-20 w-20 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    
-                    <!-- Upload/Remove buttons -->
-                    <div class="flex flex-col space-y-2">
-                      <label class="cursor-pointer px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm flex items-center justify-center">
-                        <span>Select Logo</span>
-                        <input 
-                          type="file" 
-                          class="hidden" 
-                          accept="image/*"
-                          @change="handleLogoUpload"
-                        >
-                      </label>
-                      <button 
-                        v-if="logoPreview || form.logo"
-                        type="button" 
-                        @click="removeLogo" 
-                        class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-sm flex items-center justify-center"
-                      >
-                        Remove Logo
-                      </button>
-                    </div>
-                  </div>
-                  <p class="text-sm text-gray-500 mt-1">
-                    Upload a square image (PNG, JPG) up to 2MB. Recommended size: 200x200px.
-                  </p>
-                  <div v-if="form.errors.logo" class="text-red-500 text-sm mt-1">
-                    {{ form.errors.logo }}
-                  </div>
-                </div>
-                
                 <!-- Business Email -->
                 <div>
                   <label class="block font-medium text-sm text-gray-700" for="business_email">
@@ -80,15 +41,56 @@
                   </div>
                 </div>
                 
-                <!-- Business Phone -->
-                <div>
-                  <label class="block font-medium text-sm text-gray-700" for="business_phone">
-                    Business Phone
-                  </label>
-                  <input v-model="form.business_phone" type="text" id="business_phone" 
-                         class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                  <div v-if="form.errors.business_phone" class="text-red-500 text-sm mt-1">
-                    {{ form.errors.business_phone }}
+                <!-- Logo and Phone Fields Section -->
+                <div class="col-span-1 md:col-span-2 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Logo on left side -->
+                  <div>
+                    <label class="block font-medium text-sm text-gray-700 mb-2">
+                      Business Logo
+                    </label>
+                    <LogoManager 
+                      :current-logo="settings.logo" 
+                      @updated="handleLogoUpdated"
+                    />
+                  </div>
+                  
+                  <!-- Phone fields on right side -->
+                  <div class="space-y-4">
+                    <!-- Business Phone -->
+                    <div>
+                      <label class="block font-medium text-sm text-gray-700" for="business_phone">
+                        Business Phone
+                      </label>
+                      <input v-model="form.business_phone" type="tel" id="business_phone" 
+                             class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                      <div v-if="form.errors.business_phone" class="text-red-500 text-sm mt-1">
+                        {{ form.errors.business_phone }}
+                      </div>
+                    </div>
+                    
+                    <!-- Business Mobile (new) -->
+                    <div>
+                      <label class="block font-medium text-sm text-gray-700" for="business_mobile">
+                        Business Mobile
+                      </label>
+                      <input v-model="form.business_mobile" type="tel" id="business_mobile" 
+                             class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                      <div v-if="form.errors.business_mobile" class="text-red-500 text-sm mt-1">
+                        {{ form.errors.business_mobile }}
+                      </div>
+                    </div>
+                    
+                    <!-- WhatsApp Business (new) -->
+                    <div>
+                      <label class="block font-medium text-sm text-gray-700" for="business_whatsapp">
+                        WhatsApp Business
+                      </label>
+                      <input v-model="form.business_whatsapp" type="tel" id="business_whatsapp" 
+                             class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                      <div v-if="form.errors.business_whatsapp" class="text-red-500 text-sm mt-1">
+                        {{ form.errors.business_whatsapp }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -103,20 +105,7 @@
                 <div v-if="form.errors.business_address" class="text-red-500 text-sm mt-1">
                   {{ form.errors.business_address }}
                 </div>
-              </div>
-              
-              <!-- Business Hours -->
-              <div class="mt-6">
-                <label class="block font-medium text-sm text-gray-700" for="business_hours">
-                  Business Hours
-                </label>
-                <textarea v-model="form.business_hours" id="business_hours" rows="3"
-                          class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                          placeholder="Mon-Fri: 9am-5pm, Sat: 10am-2pm, Sun: Closed"></textarea>
-                <div v-if="form.errors.business_hours" class="text-red-500 text-sm mt-1">
-                  {{ form.errors.business_hours }}
-                </div>
-              </div>
+              </div>          
             </div>
             
             <!-- Appointment Settings -->
@@ -160,41 +149,67 @@
                 </label>
               </div>
             </div>
-            
-            <!-- Submit Button -->
-            <div class="flex items-center justify-end mt-8">
-              <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:shadow-outline-blue transition ease-in-out duration-150" :disabled="form.processing">
-                <span v-if="form.processing">Saving...</span>
-                <span v-else>Save Settings</span>
+
+            <!-- Submit button for the general form -->
+            <div class="flex justify-end mt-4">
+              <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">
+                Save Settings
               </button>
             </div>
           </form>
+          
+          <!-- INCLUDE BUSINESS HOURS ONLY ONCE, AFTER THE FORM -->
+          <div class="mt-8 pt-8 border-t border-gray-200">
+            <BusinessHoursManager 
+              :initial-hours="settings.business_hours" 
+              @updated="handleBusinessHoursUpdated"
+            />
+          </div>
+          
+          <!-- NO OTHER INSTANCES OF BusinessHoursManager SHOULD APPEAR IN THE TEMPLATE -->
         </div>
       </div>
     </div>
+    
+    <!-- Add this at the end of your AppLayout -->
+    <Toast 
+      :message="toastMessage" 
+      :type="toastType" 
+      :show="showToast" 
+      @close="showToast = false"
+    />
   </AppLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import eventBus from '@/eventBus';
+import LogoManager from '@/Components/Settings/LogoManager.vue';
+import axios from 'axios';
+import BusinessHoursManager from '@/Components/Settings/BusinessHoursManager.vue'; // Import only once
+import Toast from '@/Components/UI/Toast.vue'; // Import the Toast component
 
 const props = defineProps({
   settings: Object,
 });
 
-// Add a ref for logo preview
-const logoPreview = ref(null);
+// Add at the beginning of your script section
+console.log('Settings props received:', props.settings);
+console.log('Business hours received:', props.settings?.business_hours);
 
 // Initialize form with logo field
 const form = useForm({
   business_name: props.settings?.business_name || '',
   business_email: props.settings?.business_email || '',
   business_phone: props.settings?.business_phone || '',
+  business_mobile: props.settings?.business_mobile || '', // New field
+  business_whatsapp: props.settings?.business_whatsapp || '', // New field
   business_address: props.settings?.business_address || '',
-  business_hours: props.settings?.business_hours || '',
+  business_hours: Array.isArray(props.settings?.business_hours) && props.settings.business_hours.length > 0
+    ? props.settings.business_hours
+    : initDefaultBusinessHours(),
   appointment_lead_time: props.settings?.appointment_lead_time || 24,
   appointment_duration: props.settings?.appointment_duration || 60,
   notification_email: props.settings?.notification_email || false,
@@ -202,67 +217,101 @@ const form = useForm({
   _method: 'POST', // Set method for file upload
 });
 
-// Handle logo file selection
-function handleLogoUpload(e) {
-  const file = e.target.files[0];
-  
-  if (!file) return;
-  
-  // Validate file type
-  if (!file.type.match(/image\/.*/)) {
-    form.errors.logo = 'Please select an image file';
-    return;
-  }
-  
-  // Validate file size (2MB max)
-  if (file.size > 2 * 1024 * 1024) {
-    form.errors.logo = 'Image must be less than 2MB';
-    return;
-  }
-  
-  // Create preview URL
-  logoPreview.value = URL.createObjectURL(file);
-  
-  // Set file in form data
-  form.logo = file;
+// Add helper function
+function initDefaultBusinessHours() {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days.map((day, index) => {
+    const isWeekday = index > 0 && index < 6;
+    return {
+      dayName: day,
+      isOpen: isWeekday,
+      ranges: isWeekday ? [{ startTime: 9 * 60, endTime: 17 * 60 }] : []
+    };
+  });
 }
 
-// Remove logo
-function removeLogo() {
-  logoPreview.value = null;
-  form.logo = null;
-  form._removelogo = true; // Flag for backend to remove logo
-}
+// Add these for toast notifications
+const showToast = ref(false);
+const toastMessage = ref('');
+const toastType = ref('success');
 
+// Inside your submit function
 function submit() {
-  // Use form data for file upload
+  // Debug what we're about to submit
+  console.log('Submitting business hours:', JSON.stringify(form.business_hours));
+  
+  // Create a new FormData object
   const formData = new FormData();
   
-  // Add all form fields
-  Object.keys(form).forEach(key => {
-    // Skip internal Inertia properties
-    if (key.startsWith('$') || key === 'errors' || key === 'progress' || key === 'processing' || key === 'wasSuccessful') {
-      return;
-    }
-    
-    // Add the field to form data
-    if (form[key] !== null) {
-      formData.append(key, form[key]);
-    }
-  });
+  // Add all form fields to FormData
+  formData.append('business_name', form.business_name);
+  formData.append('business_email', form.business_email);
+  formData.append('business_phone', form.business_phone);
+  formData.append('business_mobile', form.business_mobile); // New field
+  formData.append('business_whatsapp', form.business_whatsapp); // New field
+  formData.append('business_address', form.business_address);
   
-  // Post using FormData
-  form.post(route('settings.update'), {
-    data: formData,
-    onSuccess: () => {
-      // Emit event with the new business name
-      eventBus.emit('business-name-changed', form.business_name);
-      
-      // If logo changed, emit another event
-      if (logoPreview.value || form._removelogo) {
-        eventBus.emit('business-logo-changed', form.logo ? logoPreview.value : null);
-      }
+  formData.append('appointment_lead_time', form.appointment_lead_time);
+  formData.append('appointment_duration', form.appointment_duration);
+  formData.append('notification_email', form.notification_email ? 1 : 0);
+  
+  // Add logo if it's a File object
+  if (form.logo instanceof File) {
+    formData.append('logo', form.logo);
+  }
+  
+  // Add remove logo flag if needed
+  if (form._removelogo) {
+    formData.append('_removelogo', '1');
+  }
+  
+  // Submit the form
+  axios.post(route('settings.update'), formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
     }
+  })
+  .then(response => {
+    // Show success toast
+    toastMessage.value = 'Settings updated successfully';
+    toastType.value = 'success';
+    showToast.value = true;
+    
+    // Emit events for header updates
+    eventBus.emit('business-name-changed', form.business_name);
+    
+    // Reset form processing state
+    form.processing = false;
+    form.wasSuccessful = true;
+    
+    // Use a less disruptive approach than full page reload
+    // This keeps your component state but refreshes the Inertia props
+    router.reload({ only: ['settings'] });
+  })
+  .catch(error => {
+    // Show error toast
+    toastMessage.value = error.response?.data?.message || 'Error updating settings';
+    toastType.value = 'error';
+    showToast.value = true;
+    
+    console.error('Error saving settings:', error);
+    form.processing = false;
   });
 }
+
+// Add this event handler to listen to events from child components
+function handleBusinessHoursUpdated() {
+  toastMessage.value = 'Business hours updated successfully';
+  toastType.value = 'success';
+  showToast.value = true;
+}
+
+function handleLogoUpdated() {
+  toastMessage.value = 'Logo updated successfully';
+  toastType.value = 'success';
+  showToast.value = true;
+}
+
+// At the bottom of your script setup
+
 </script>
