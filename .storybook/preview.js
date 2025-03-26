@@ -38,17 +38,33 @@ const preview = {
       values: [
         {
           name: 'light',
-          value: '#f3f4f6',
+          value: '#ffffff',
         },
         {
           name: 'dark',
-          value: '#1f2937',
+          value: '#0d1117',
         },
       ],
     },
     // Dark mode toolbar
     darkMode: {
       stylePreview: true, // Adds a dark mode toggle in the toolbar
+    },
+    // Add design tokens for colors
+    designTokens: {
+      categories: [
+        {
+          name: 'Colors',
+          tokens: [
+            { name: 'Primary', value: '#0969da' },
+            { name: 'Secondary', value: '#238636' },
+            { name: 'Success', value: '#2da44e' },
+            { name: 'Warning', value: '#bf8700' },
+            { name: 'Error', value: '#cf222e' },
+            // Add more colors as needed
+          ]
+        }
+      ]
     }
   },
 };

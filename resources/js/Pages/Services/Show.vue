@@ -1,5 +1,5 @@
 <template>
-  <AppLayout :title="`Service: ${service.name}`">
+  <AppLayout :title="`Service: ${service.name}`" :user="$page.props.auth.user">
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Service Details Card -->

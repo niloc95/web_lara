@@ -1,74 +1,149 @@
-<script setup>
-import { ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
-import NavLink from '@/Components/NavLink.vue'; // Add this import
-import TopHeader from '../Components/Layout/TopHeader.vue';
-import Sidebar from '../Components/Layout/Sidebar.vue';
-import QuickActionsMenu from '../Components/Dashboard/QuickActionsMenu.vue';
+<script>
+// Regular script for props definition
+import { usePage as inertiaPage } from '@inertiajs/vue3'; // Renamed to avoid conflict
 
-const showingNavigationDropdown = ref(false);
-
-const logout = () => {
-    router.post(route('logout'));
-};
-
-const props = defineProps({
-  user: {
-    type: Object,
-    default: () => ({
-      name: 'Demo User',
-      email: 'user@example.com'
-    })
-  },
-  companyName: {
-    type: String,
-    default: 'WebSchedulr'
-  },
-  logoUrl: {
-    type: String,
-    default: null
-  },
-  navigationItems: {
-    type: Array,
-    required: true
-  },
-  quickActions: {
-    type: Array,
-    required: true
+export default {
+  props: {
+    companyName: {
+      type: String,
+      default: 'WebSchedulr'
+    },
+    title: {
+      type: String,
+      default: ''
+    },
+    user: {
+      type: Object,
+      required: false,
+      default: () => inertiaPage().props.value.auth?.user || {} // Use renamed import
+    }
   }
+};
+</script>
+
+<script setup>
+import { ref, computed, watch } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import TopHeader from '@/Components/Layout/TopHeader.vue';
+import Sidebar from '@/Components/Layout/Sidebar.vue';
+import QuickActionsMenu from '@/Components/Dashboard/QuickActionsMenu.vue';
+
+// Debug the imports
+console.log('QuickActionsMenu loaded:', !!QuickActionsMenu);
+
+const page = usePage();
+
+// Make sure this is declared and initialized BEFORE it's used
+const showQuickActions = ref(false);
+
+// Add a watcher to debug state changes
+watch(showQuickActions, (newVal) => {
+  console.log('Quick actions visibility changed:', newVal);
 });
 
-const showQuickActions = ref(false);
+// Function to open the quick actions menu
+function openQuickActionsMenu() {
+  console.log('Opening quick actions menu from AppLayout');
+  showQuickActions.value = true;
+}
+
+// Safely get current component name with fallback
+const currentRouteName = computed(() => {
+  if (page.component && typeof page.component.value === 'string') {
+    return page.component.value.split('/')[0];
+  }
+  return '';
+});
+
+// Navigation items with added Appointments entry
+const navigationItems = computed(() => [
+  {
+    label: 'Dashboard',
+    icon: 'fa-chart-line',
+    href: route('dashboard'),
+    active: currentRouteName.value === 'Dashboard'
+  },
+  {
+    label: 'Calendar',
+    icon: 'fa-calendar-alt',
+    href: route('calendar'),
+    active: currentRouteName.value === 'Calendar'
+  },
+  {
+    label: 'Bookings',
+    icon: 'fa-calendar-check',
+    href: route('appointments.index'),
+    active: currentRouteName.value === 'Appointments'
+  },
+  {
+    label: 'Clients',
+    icon: 'fa-users',
+    href: route('clients.index'),
+    active: currentRouteName.value === 'Clients'
+  },
+  {
+    label: 'Services',
+    icon: 'fa-concierge-bell',
+    href: route('services.index'),
+    active: currentRouteName.value === 'Services'
+  },
+  {
+    label: 'Settings',
+    icon: 'fa-cog',
+    href: route('settings.index'),
+    active: currentRouteName.value === 'Settings'
+  }
+]);
+
+// Make sure quickActions is defined AFTER showQuickActions
+const quickActions = [
+  {
+    label: 'New Appointment',
+    description: 'Schedule a new appointment',
+    icon: 'fa-calendar-plus',
+    color: 'primary',
+    href: route('appointments.create')
+  },
+  {
+    label: 'New Client',
+    description: 'Add a new client',
+    icon: 'fa-user-plus',
+    color: 'secondary',
+    href: route('clients.create')
+  }
+];
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
-    <!-- Top Header -->
+  <div class="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-950">
+    <!-- TopHeader no longer needs company name -->
     <TopHeader 
-      :company-name="companyName" 
-      :logo-url="logoUrl" 
-      :user="user" 
+      :user="user"
     />
     
-    <!-- Content Area with Sidebar -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- Sidebar -->
+      <!-- Sidebar - Notice we're using the function directly -->
       <Sidebar 
         :navigation-items="navigationItems" 
-        @open-quick-actions="showQuickActions = true"
+        @open-quick-actions="openQuickActionsMenu"
       />
       
       <!-- Main Content -->
-      <div class="flex-1 overflow-y-auto">
+      <main class="flex-1 overflow-y-auto">
         <div class="p-6">
           <slot></slot>
         </div>
-      </div>
+      </main>
     </div>
     
-    <!-- Quick Actions Menu -->
+    <!-- Debug info -->
+    <div v-if="false" class="fixed bottom-0 right-0 bg-black text-white p-2 z-[100]">
+      showQuickActions: {{ showQuickActions }}
+    </div>
+    
+    <!-- Quick Actions Menu - Make sure we're passing the right props -->
     <QuickActionsMenu 
-      :is-open="showQuickActions" 
+      :is-open="showQuickActions"
       :actions="quickActions"
       @close="showQuickActions = false"
     />
