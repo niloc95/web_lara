@@ -263,6 +263,9 @@ import StatsCard from '@/Components/Dashboard/StatsCard.vue';
 import AppointmentsTable from '../Components/Dashboard/AppointmentsTable.vue';
 import Tooltip from '@/Components/UI/Tooltip.vue';
 
+// Add this import
+import QuickActionsMenu from '@/Components/Dashboard/QuickActionsMenu.vue';
+
 // Props
 const props = defineProps({
   auth: Object,

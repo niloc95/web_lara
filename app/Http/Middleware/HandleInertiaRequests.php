@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\BusinessSetting;
+use Illuminate\Support\Facades\Cache;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -29,11 +31,36 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
+        $user = $request->user();
+        
+        // Get fresh business settings with caching
+        $businessSettings = null;
+        if ($user) {
+            $businessSettings = Cache::remember('business_settings_'.$user->id, 10, function() use ($user) {
+                return BusinessSetting::where('user_id', $user->id)->first();
+            });
+        }
+        
+        // Get logo URL
+        $logoUrl = null;
+        if ($businessSettings && $businessSettings->logo) {
+            $logoUrl = asset('storage/' . $businessSettings->logo);
+        }
+        
+        return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
-        ];
+            'appName' => config('app.name'),
+            'businessSettings' => [
+                'name' => $businessSettings->business_name ?? config('app.name'),
+                'logo' => $logoUrl,
+                // Add other business settings fields as needed
+            ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+        ]);
     }
 }

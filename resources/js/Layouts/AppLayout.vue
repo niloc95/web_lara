@@ -116,9 +116,8 @@ const quickActions = [
 
 <template>
   <div class="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-950">
-    <!-- Top Header -->
+    <!-- TopHeader no longer needs company name -->
     <TopHeader 
-      :company-name="companyName" 
       :user="user"
     />
     

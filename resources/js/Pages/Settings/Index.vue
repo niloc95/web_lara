@@ -23,6 +23,51 @@
                   </div>
                 </div>
                 
+                <!-- Business Logo -->
+                <div>
+                  <label class="block font-medium text-sm text-gray-700">
+                    Business Logo
+                  </label>
+                  <div class="mt-1 flex items-center">
+                    <!-- Logo preview -->
+                    <div v-if="logoPreview || form.logo" class="mr-4 h-20 w-20 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                      <img :src="logoPreview || `/storage/${form.logo}`" alt="Business logo preview" class="h-full w-full object-contain">
+                    </div>
+                    <div v-else class="mr-4 h-20 w-20 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    
+                    <!-- Upload/Remove buttons -->
+                    <div class="flex flex-col space-y-2">
+                      <label class="cursor-pointer px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm flex items-center justify-center">
+                        <span>Select Logo</span>
+                        <input 
+                          type="file" 
+                          class="hidden" 
+                          accept="image/*"
+                          @change="handleLogoUpload"
+                        >
+                      </label>
+                      <button 
+                        v-if="logoPreview || form.logo"
+                        type="button" 
+                        @click="removeLogo" 
+                        class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-sm flex items-center justify-center"
+                      >
+                        Remove Logo
+                      </button>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-500 mt-1">
+                    Upload a square image (PNG, JPG) up to 2MB. Recommended size: 200x200px.
+                  </p>
+                  <div v-if="form.errors.logo" class="text-red-500 text-sm mt-1">
+                    {{ form.errors.logo }}
+                  </div>
+                </div>
+                
                 <!-- Business Email -->
                 <div>
                   <label class="block font-medium text-sm text-gray-700" for="business_email">
@@ -131,14 +176,19 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import eventBus from '@/eventBus';
 
 const props = defineProps({
   settings: Object,
 });
 
-// Initialize form with existing settings
+// Add a ref for logo preview
+const logoPreview = ref(null);
+
+// Initialize form with logo field
 const form = useForm({
   business_name: props.settings?.business_name || '',
   business_email: props.settings?.business_email || '',
@@ -148,9 +198,71 @@ const form = useForm({
   appointment_lead_time: props.settings?.appointment_lead_time || 24,
   appointment_duration: props.settings?.appointment_duration || 60,
   notification_email: props.settings?.notification_email || false,
+  logo: props.settings?.logo || null,
+  _method: 'POST', // Set method for file upload
 });
 
+// Handle logo file selection
+function handleLogoUpload(e) {
+  const file = e.target.files[0];
+  
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.match(/image\/.*/)) {
+    form.errors.logo = 'Please select an image file';
+    return;
+  }
+  
+  // Validate file size (2MB max)
+  if (file.size > 2 * 1024 * 1024) {
+    form.errors.logo = 'Image must be less than 2MB';
+    return;
+  }
+  
+  // Create preview URL
+  logoPreview.value = URL.createObjectURL(file);
+  
+  // Set file in form data
+  form.logo = file;
+}
+
+// Remove logo
+function removeLogo() {
+  logoPreview.value = null;
+  form.logo = null;
+  form._removelogo = true; // Flag for backend to remove logo
+}
+
 function submit() {
-  form.post(route('settings.update'));
+  // Use form data for file upload
+  const formData = new FormData();
+  
+  // Add all form fields
+  Object.keys(form).forEach(key => {
+    // Skip internal Inertia properties
+    if (key.startsWith('$') || key === 'errors' || key === 'progress' || key === 'processing' || key === 'wasSuccessful') {
+      return;
+    }
+    
+    // Add the field to form data
+    if (form[key] !== null) {
+      formData.append(key, form[key]);
+    }
+  });
+  
+  // Post using FormData
+  form.post(route('settings.update'), {
+    data: formData,
+    onSuccess: () => {
+      // Emit event with the new business name
+      eventBus.emit('business-name-changed', form.business_name);
+      
+      // If logo changed, emit another event
+      if (logoPreview.value || form._removelogo) {
+        eventBus.emit('business-logo-changed', form.logo ? logoPreview.value : null);
+      }
+    }
+  });
 }
 </script>
